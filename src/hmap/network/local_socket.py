@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import random
+
+from hmap.network import AbstractSocket
+
+
+class LocalSocket(AbstractSocket):
+    """
+    Interacts with other sockets on the same thread and process. LocalSocket is
+    not thread-safe and is intended for testing purposes: spoofing up
+    interactions between nodes
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._sockets = []  # [(<LocalSocket>, <prob success>), ...]
+
+    @property
+    def sockets():
+        """
+        Tuple list of sockets and their probability of successful sends
+        """
+        return self._sockets
+
+    def add_socket(self, socket: AbstractSocket, prob: float):
+        """
+        Connects one local socket to another. The connection is one-way.
+
+        Args:
+            socket: socket connecting to
+            prob: probability that messages sent to the socket will make it
+        """
+        self._sockets.append((socket, prob))
+
+    def broadcast(self, data: bytes):
+        """
+        Iterates through all sockets and invokes their deliver methods with a
+        probability corresponding to the socket
+        """
+        for s, prob in self._sockets:
+            if random.random() < prob:
+                s.deliver(data)
