@@ -1,8 +1,8 @@
-========
-hive-map
-========
+====
+hmap
+====
 
-This is the documentation of **hive-map**.
+This is the documentation of **hmap**.
 
 .. note::
 
