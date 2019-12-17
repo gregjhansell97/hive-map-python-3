@@ -18,7 +18,7 @@ class AbstractSocket(ABC):
     """
 
     def __init__(self):
-        self._callbacks = dict() # key is topic, value is callback
+        self._callbacks = dict()  # key is topic, value is callback
 
     def _subscribe(self, topic: int, cb):
         """

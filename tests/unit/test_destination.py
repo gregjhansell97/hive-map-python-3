@@ -10,16 +10,15 @@ from tests.local_socket import LocalSocket
 
 
 def get_destinations(size, reliability=0.9):
-    return [
-        Destination(t, reliability=reliability) 
-        for t in range(size)
-    ]
+    return [Destination(t, reliability=reliability) for t in range(size)]
+
 
 def test_initialization():
     """
     Verify destination starts up with a unique id describing destination
     """
     d = Destination(1)
+
 
 def test_use_socket_one_destination():
     """
@@ -29,6 +28,7 @@ def test_use_socket_one_destination():
     s = LocalSocket.get_sockets(1)[0]
     d.use(s)
 
+
 def test_use_socket_multiple_destination():
     """
     Verify that one socket can be used for multiple destinations
@@ -37,6 +37,7 @@ def test_use_socket_multiple_destination():
     s = LocalSocket.get_sockets(1)[0]
     for d in destinations:
         d.use(s)
+
 
 def test_use_socket_multiple_times_on_destination():
     """
@@ -62,6 +63,7 @@ def test_use_sockets_one_destination():
     for s in sockets:
         d.use(s)
 
+
 def test_use_sockets_multiple_destination_with_overlap():
     """
     Verify multiple sockets can be used by multiple destinations
@@ -71,6 +73,7 @@ def test_use_sockets_multiple_destination_with_overlap():
     for d in destinations:
         for s in sockets:
             d.use(s)
+
 
 def test_update_distance():
     """
@@ -112,7 +115,3 @@ def test_update_distance():
         d._increment_reliability(3, 0.5)
         d._increment_reliability(2, 0.85)
     assert d.distance == 3
-
-
-    
-

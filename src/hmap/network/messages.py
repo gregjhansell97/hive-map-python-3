@@ -15,13 +15,17 @@ class SocketHeader(AbstractHeader):
         a_2(int): second 2 bytes of allignment
         topic(int): topic that can be subscribed to
     """
+
     allignment = 0xABCD
+
     def __init__(self, a_1: int, a_2: int, topic: int):
         assert self.allignment == (a_1 << 8) + a_2
         self.topic = topic
+
     @staticmethod
     def fmt():
         return "2BI"
+
     @property
     def data(self):
         a_1 = 0xAB

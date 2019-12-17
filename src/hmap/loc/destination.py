@@ -17,10 +17,7 @@ class Destination:
     """
 
     def __init__(
-        self, 
-        target: int, 
-        reliability: float = 0.9, 
-        learning_rate: float = 0.1
+        self, target: int, reliability: float = 0.9, learning_rate: float = 0.1
     ):
         """
         Creates a destination instance

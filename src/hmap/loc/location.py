@@ -6,6 +6,7 @@ import struct
 
 from hmap.loc.messages import LocHeader
 
+
 class Location:
     """
     Locations await messages delivered to them using the sockets provided. When
@@ -18,13 +19,13 @@ class Location:
         self._id = id_
         # prevents redundant messages being received
         self._rcvd_msg_ids = deque(maxlen=10)
+
     @property
     def id(self):
         """
         Unique id of location that destinations use for their target
         """
         return self._id
-
 
     def subscribe(self, callback):
         """
@@ -78,7 +79,7 @@ class Location:
             # valid publish header, send acknowledgment and then process body
             self._rcvd_msg_ids.append(h.id)
             ack_h = LocHeader(LocHeader.ACK, 0, h.id)
-            ack_b = struct.pack("B", 255) # pack in probability
+            ack_b = struct.pack("B", 255)  # pack in probability
             socket._publish(self._id, LocHeader.serialize(ack_h, ack_b))
             # invoke all callbacks
             for cb in self._subscribers:

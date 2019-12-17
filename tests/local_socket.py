@@ -5,6 +5,7 @@ import random
 
 from hmap import AbstractSocket
 
+
 class LocalSocket(AbstractSocket):
     """
     Interacts with other sockets on the same thread and process. LocalSocket is

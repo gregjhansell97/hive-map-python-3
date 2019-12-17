@@ -15,18 +15,22 @@ class Header(AbstractHeader):
         self.a = a
         self.b = b
         self.c = c
+
     @staticmethod
     def fmt():
         return "BBI"
+
     @property
     def data(self):
         return (self.a, self.b, self.c)
+
 
 def test_header_initialization():
     """
     Basic creation of a header
     """
     h = Header(0, 255, 0xFFFFFFFF)
+
 
 def test_header_serialization_and_deserialization():
     """

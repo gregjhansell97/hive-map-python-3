@@ -26,6 +26,7 @@ def test_subscribe():
     s = LocalSocket.get_sockets(1)[0]
     s._subscribe(2, None)
 
+
 def test_publish():
     """
     Ensures that _publish method of hmap.network.AbstractSocket works in the
@@ -48,6 +49,7 @@ def get_callback():
 
     def cb(socket: LocalSocket, topic: int, data: bytes):
         cb.log.append((socket, topic, data))
+
     cb.log = []
     return cb
 
