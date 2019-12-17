@@ -3,6 +3,7 @@
 
 from collections import defaultdict, deque
 import math
+import random
 import struct
 
 from hmap.loc.messages import LocHeader
@@ -51,7 +52,7 @@ class Destination:
         # key: distance away
         # value: (<prob of success>, <decrement count>)
         self._distances_table = defaultdict(lambda: (0.0, 0))
-        # creates semi-unique message ids
+        # prevents redundant messages (both sending and receiving)
         self._sent_msg_ids = deque(maxlen=10)
         self._rcvd_msg_ids = deque(maxlen=10)
 
@@ -107,15 +108,15 @@ class Destination:
         """
         # create a random message id and append it
         msg_id = random.randint(0, 0xFFFFFFFF)
-        self.sent_msg_ids.append(msg_id)
+        self._sent_msg_ids.append(msg_id)
         # look to publish body
         d = self.distance
         h = LocHeader(LocHeader.PUB, d, msg_id)
         raw_msg = LocHeader.serialize(h, body)
         # decrease reliability at distance (expectation that it will recv ack)
         self._decrement_reliability(d)
-        for s in self.sockets:
-            s._publish(self.id, raw_msg)
+        for s in self._sockets:
+            s._publish(self._target, raw_msg)
 
     def _deliver(self, socket, topic: int, data: bytes):
         """
@@ -131,25 +132,25 @@ class Destination:
         """
         # handles logistics of data received by a socket being used for a
         # specific destiantion
-        assert topic == self.target
+        assert topic == self._target
         # break apart data into a message
         h, b = LocHeader.deserialize(data)
         if h.type == LocHeader.PUB:  # publish message
             d = self.distance
+            # filter out further distances and already received messages
             if d >= h.distance:
                 return  # further away, can't do anything
             elif h.id in self._rcvd_msg_ids:
                 return  # likely already received message
-            else:
-                # to do register h.id so that it can be ignored until refreshed
-                self._rcvd_msg_ids.append(h.id)
-                # publish ack
-                self._publish_ack(d, h.id)
-                ack_h = LocHeader(LocHeader.ACK, d, h.id)
-                ack_b = struct.pack("B", round(self.reliability * 255))
-                socket._publish(self.target, LocHeader.serialize(ack_h, ack_b))
-                # forward information off
-                self.publish(b)
+            # to do register h.id so that it can be ignored until refreshed
+            self._rcvd_msg_ids.append(h.id)
+            # publish ack
+            self._publish_ack(d, h.id)
+            ack_h = LocHeader(LocHeader.ACK, d, h.id)
+            ack_b = struct.pack("B", round(self.reliability * 255))
+            socket._publish(self._target, LocHeader.serialize(ack_h, ack_b))
+            # forward information off
+            self.publish(b)
         elif h.type == LocHeader.ACK:  # acknowledge message
             ack_distance = h.distance
             ack_prob = struct.unpack("B", b)[0] / 255
@@ -211,8 +212,8 @@ class Destination:
             prob_failure *= 1 - self._distances_table[d][0]
             if 1 - prob_failure > self._min_reliability:
                 self._distance = d
-                self._reliability = 1 - prob_failure
+                self._reliability = round(1.0 - prob_failure, 3)
                 return
         # could not accrue enough probability
         self._distance = math.inf
-        self._reliability = 1.0 - prob_failure
+        self._reliability = round(1.0 - prob_failure, 3)

@@ -3,8 +3,7 @@
 
 import random
 
-from hmap.network import AbstractSocket
-
+from hmap import AbstractSocket
 
 class LocalSocket(AbstractSocket):
     """
@@ -16,6 +15,26 @@ class LocalSocket(AbstractSocket):
     def __init__(self):
         super().__init__()
         self._sockets = []  # [(<LocalSocket>, <prob success>), ...]
+
+    @staticmethod
+    def get_sockets(size: int, reliability: float = 1.0):
+        """
+        Creates a fully connected network of local sockets
+
+        Args:
+            size: number of sockets in inter-connected-socket-network
+            reliability: probability of success that a message sent from one 
+            socket gets to another socket
+
+        Returns:
+            (list): list of LocalSocket instances all interconnected
+        """
+        sockets = [LocalSocket() for _ in range(size)]
+        for s_i in sockets:
+            for s_j in sockets:
+                if s_i is not s_j:
+                    s_i.add_socket(s_j, reliability)
+        return sockets
 
     @property
     def sockets():

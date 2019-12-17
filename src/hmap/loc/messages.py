@@ -17,7 +17,7 @@ class LocHeader(AbstractHeader):
     ACK = 1
     def __init__(self, type_: int, distance: int, header_id: int):
         self.type = type_
-        self.distance = distance
+        self.distance = min(distance, 0xFF)
         self.id = header_id
     @staticmethod
     def fmt():

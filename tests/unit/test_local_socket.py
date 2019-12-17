@@ -8,34 +8,14 @@ Unit tests for LocalSocket; the main target of these tests is AbstractSocket
 from collections import defaultdict
 import pytest
 
-from hmap.network import LocalSocket
-
-
-def get_sockets(size: int, reliability: float = 1.0):
-    """
-    Creates a fully connected network of local sockets
-
-    Args:
-        size: number of sockets in inter-connected-socket-network
-        reliability: probability of success that a message sent from one socket
-            gets to another socket
-
-    Returns:
-        (list): list of LocalSocket instances all interconnected
-    """
-    sockets = [LocalSocket() for _ in range(size)]
-    for s_i in sockets:
-        for s_j in sockets:
-            if s_i is not s_j:
-                s_i.add_socket(s_j, reliability)
-    return sockets
+from tests.local_socket import LocalSocket
 
 
 def test_initialization():
     """
     Ensures that local sockets can be created
     """
-    sockets = get_sockets(10)
+    sockets = LocalSocket.get_sockets(10)
 
 
 def test_subscribe():
@@ -43,7 +23,7 @@ def test_subscribe():
     Ensures that _subscribe method of hmap.network.AbstractSocket works in the
     most basic capacity
     """
-    s = get_sockets(1)[0]
+    s = LocalSocket.get_sockets(1)[0]
     s._subscribe(2, None)
 
 def test_publish():
@@ -51,7 +31,7 @@ def test_publish():
     Ensures that _publish method of hmap.network.AbstractSocket works in the
     most basic capacity
     """
-    s = get_sockets(1)[0]
+    s = LocalSocket.get_sockets(1)[0]
     s._publish(2, b"message in a bottle")
 
 
@@ -79,7 +59,7 @@ def test_publish_subscribe_2_socket_network():
     """
     cb = get_callback()
 
-    sockets = get_sockets(2)
+    sockets = LocalSocket.get_sockets(2)
     sockets[1]._subscribe(2, cb)
     p_count = 10
     for i in range(p_count):
@@ -94,7 +74,7 @@ def test_publish_subscribe_multiple_socket_network():
     """
     cb = get_callback()
 
-    sockets = get_sockets(10)
+    sockets = LocalSocket.get_sockets(10)
     # each socket has their own callback
     callbacks = [get_callback() for s in sockets]
 

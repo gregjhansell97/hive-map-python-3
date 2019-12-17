@@ -6,7 +6,7 @@ import pytest
 
 from hmap.loc import Destination
 
-from tests.test_local_socket import get_sockets
+from tests.local_socket import LocalSocket
 
 
 def get_destinations(size, reliability=0.9):
@@ -26,7 +26,7 @@ def test_use_socket_one_destination():
     Verify that a provided socket can be used by a destination
     """
     d = Destination(1)
-    s = get_sockets(1)[0]
+    s = LocalSocket.get_sockets(1)[0]
     d.use(s)
 
 def test_use_socket_multiple_destination():
@@ -34,7 +34,7 @@ def test_use_socket_multiple_destination():
     Verify that one socket can be used for multiple destinations
     """
     destinations = get_destinations(10)
-    s = get_sockets(1)[0]
+    s = LocalSocket.get_sockets(1)[0]
     for d in destinations:
         d.use(s)
 
@@ -43,7 +43,7 @@ def test_use_socket_multiple_times_on_destination():
     Verify that one socket used more than once on a destination raises an error
     """
     d = Destination(1)
-    s = get_sockets(1)[0]
+    s = LocalSocket.get_sockets(1)[0]
     d.use(s)
     try:
         d.use(s)
@@ -57,7 +57,7 @@ def test_use_sockets_one_destination():
     """
     Verify multiple sockets can be used by one destination
     """
-    sockets = get_sockets(10)
+    sockets = LocalSocket.get_sockets(10)
     d = Destination(1)
     for s in sockets:
         d.use(s)
@@ -67,7 +67,7 @@ def test_use_sockets_multiple_destination_with_overlap():
     Verify multiple sockets can be used by multiple destinations
     """
     destinations = get_destinations(10)
-    sockets = get_sockets(10)
+    sockets = LocalSocket.get_sockets(10)
     for d in destinations:
         for s in sockets:
             d.use(s)
