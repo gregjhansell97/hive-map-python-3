@@ -1,76 +1,76 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+This module facilitates serialization and distributiont of information; it sets
+the standards used by the other modules. Internal use only.
+"""
+
 from abc import ABC, abstractmethod
 import struct
 
 
 class AbstractHeader:
     """
-    All headers must comply with AbstractHeader to be serializable with the Msg
-    class. Also must register themselves as a header
+    All headers must comply with AbstractHeader to be serializable into bytes
+    and deserialized into a header and body
     """
+
     def __init__(self):
         raise NotImplementedError
-        
+
+    @classmethod
+    def serialize(class_, header, body: bytes):
+        """
+        Serializes a header and body into bytes that can be deserialized later.
+        A class method instead of an instance's method to match deserialize
+
+        Args:
+            header: same type as the class invoking serialize
+            body: raw bytes of data to tack on to header
+
+        Returns:
+            (bytes): serialized data of header and body
+        """
+        fmt = class_.fmt()
+        data = header.data
+        return struct.pack(fmt, *data) + body
+
+    @classmethod
+    def deserialize(H, raw_data: bytes):
+        """
+        Converts raw_data into a header and body
+
+        Args:
+            raw_data: bytes containing both the header and body
+
+        Returns:
+            (tuple): first item is the header of the header class used to
+                deserialize; second item is the body which are the remaining
+                bytes
+        """
+        fmt = H.fmt()
+        size = struct.calcsize(fmt)
+        # breakdown next header
+        header = H(*struct.unpack(fmt, raw_data[:size]))
+        body = raw_data[size:]
+        return (header, body)
+
     @staticmethod
     @abstractmethod
-    def fmt()->str:
+    def fmt():
         """
         Returns:
-            description of format style specified by pythons page on structs
+            (str): Description of format style specified by pythons page on 
+                structs
         """
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def data(self)->tuple:
+    def data(self):
         """
-        Returns:
-            data as a tuple being serialized by a certain fmt, should be able 
-                to put into constructor
+        Data as a tuple being serialized by a certain fmt, should be able to 
+        put into constructor
         """
         raise NotImplementedError
-
-
-    
-
-class Msg:
-    """
-    All messages have a header and a body. The header is meta information
-    pertaining to the data and handling of the data. Factory class that
-    serializes and deserializes the header and body of Msg instance. Did 
-    not pickle because pickle includes an enum infront of raw bytes to
-    indicate which class to use when deserializing
-
-    Attributes:
-        header: on of the header classes defined in headers
-        body(bytes): raw bytes being stored
-        allignment(bytes): verify the ordering of bytes to determine how to
-            decifer the rest of the message
-        type(int): header type being sent [10, 255], did this instead of leaning
-            on enum class type because needs to work across languages
-    """
-    def __init__(self, header, body):
-        self.header = header
-        self.body = body
-
-    @staticmethod
-    def serialize(m):
-        """
-        """
-        fmt = m.header.fmt
-        data = m.header.data
-        return struct.pack(fmt, *data) + m.body
-
-    @staticmethod
-    def deserialize(exp_cls, raw_data):
-        """
-        """
-        H = exp_cls
-        fmt = H.fmt
-        size = struct.calcsize(fmt)
-        # breakdown next header
-        header = H(*struct.unpack(fmt, raw_data[:size]))
-        body = raw_data[size:]
-        return Msg(header, body)

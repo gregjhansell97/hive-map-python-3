@@ -3,7 +3,6 @@
 
 from abc import ABC, abstractmethod
 
-from hmap.messages import Msg
 from hmap.network.messages import SocketHeader
 
 
@@ -45,8 +44,8 @@ class AbstractSocket(ABC):
             msg: raw bytes being published
         """
         h = SocketHeader(0xAB, 0xCD, topic)
-        msg = Msg(h, msg)
-        self.broadcast(Msg.serialize(msg))
+        raw_msg = SocketHeader.serialize(h, msg)
+        self.broadcast(raw_msg)
 
     def deliver(self, data: bytes):
         """
@@ -56,13 +55,13 @@ class AbstractSocket(ABC):
         Args:
             data: raw bytes delivered to socket
         """
-        msg = Msg.deserialize(SocketHeader, data)
+        header, body = SocketHeader.deserialize(data)
         try:
-            cb = self._callbacks[msg.header.topic]
+            cb = self._callbacks[header.topic]
         except KeyError:
             pass
         else:
-            cb(self, msg.header.topic, msg.body)
+            cb(self, header.topic, body)
 
     @abstractmethod
     def broadcast(self, data: bytes):
