@@ -61,13 +61,13 @@ def get_callback():
     function was created because a lot of tests create a callback
 
     Returns:
-        (lambda t, d): callback used for subscriptions in tests. All callbacks
+        (lambda s,t,d): callback used for subscriptions in tests. All callbacks
             have an attribute called log which shows the list of all invocations
             of the method.
     """
 
-    def cb(topic: int, data: bytes):
-        cb.log.append((topic, data))
+    def cb(socket: LocalSocket, topic: int, data: bytes):
+        cb.log.append((socket, topic, data))
     cb.log = []
     return cb
 
@@ -84,7 +84,7 @@ def test_publish_subscribe_2_socket_network():
     p_count = 10
     for i in range(p_count):
         sockets[0]._publish(2, b"hello world")
-    assert cb.log == [(2, b"hello world")] * 10
+    assert cb.log == [(sockets[1], 2, b"hello world")] * 10
 
 
 def test_publish_subscribe_multiple_socket_network():
@@ -109,16 +109,16 @@ def test_publish_subscribe_multiple_socket_network():
     sockets[1]._publish(2, b"hello world")
     for i, cb in zip(range(len(callbacks)), callbacks):
         if i == 2:
-            assert cb.log == [(2, b"hello world")]
+            assert cb.log == [(sockets[2], 2, b"hello world")]
         else:
             assert cb.log == []
 
     sockets[1]._publish(5, b"hello world")
     sockets[1]._publish(5, b"hello world")
-    assert callbacks[5].log == 2 * [(5, b"hello world")]
+    assert callbacks[5].log == 2 * [(sockets[5], 5, b"hello world")]
 
     sockets[5]._publish(8, b"hello world")
-    assert callbacks[8].log == [(8, b"hello world")]
+    assert callbacks[8].log == [(sockets[8], 8, b"hello world")]
 
     sockets[4]._publish(4, b"hello world")
     assert callbacks[4].log == []  # does not look at local subscribers

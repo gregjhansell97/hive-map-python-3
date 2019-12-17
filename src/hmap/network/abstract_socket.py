@@ -62,7 +62,7 @@ class AbstractSocket(ABC):
         except KeyError:
             pass
         else:
-            cb(msg.header.topic, msg.body)
+            cb(self, msg.header.topic, msg.body)
 
     @abstractmethod
     def broadcast(self, data: bytes):
