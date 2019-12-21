@@ -3,7 +3,7 @@
 
 from abc import ABC, abstractmethod
 
-from hmap.network.messages import SocketHeader
+from hmap.sockets.messages import SocketHeader
 
 
 class AbstractSocket(ABC):

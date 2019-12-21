@@ -3,7 +3,7 @@
 
 import random
 
-from hmap import AbstractSocket
+from hmap.sockets import AbstractSocket
 
 
 class LocalSocket(AbstractSocket):

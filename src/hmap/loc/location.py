@@ -47,7 +47,7 @@ class Location:
         once
 
         Args:
-            socket(hmap.network.Socket): socket used by destination
+            socket(hmap.sockets.Socket): socket used by destination
 
         Raises:
             ValueError: attempting to use socket more than once
@@ -62,7 +62,7 @@ class Location:
         Handles logistics of data received by this location
 
         Args:
-            socket(hmap.network.AbstractSocket): socket invoking this _deliver
+            socket(hmap.sockets.AbstractSocket): socket invoking this _deliver
                 method
             topic: topic of item deliverd (it should match id)
             data: data received by location. Can receive a location

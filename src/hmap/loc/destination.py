@@ -85,7 +85,7 @@ class Destination:
         than once
 
         Args:
-            socket(hmap.network.AbstractSocket): socket used by destination to 
+            socket(hmap.sockets.AbstractSocket): socket used by destination to 
                 reach out to other destinations and locations on a network
 
         Raises:
@@ -120,7 +120,7 @@ class Destination:
         Handles logistics of data received by this destination
 
         Args:
-            socket(hmap.network.AbstractSocket): socket invoking this _deliver
+            socket(hmap.sockets.AbstractSocket): socket invoking this _deliver
                 method
             topic: topic of item deliverd (it should match target)
             data: data received by destination. Can receive a destiantion
