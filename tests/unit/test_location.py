@@ -21,6 +21,7 @@ def test_initialization():
     def callback(msg):
         pass
 
+    assert l.id == 1
     l.subscribe(callback)
 
 

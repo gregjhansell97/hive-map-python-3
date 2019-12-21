@@ -18,6 +18,27 @@ def test_initialization():
     Verify destination starts up with a unique id describing destination
     """
     d = Destination(1)
+    assert d.target == 1
+
+def test_initialization_error():
+    """
+    Verify that value error is raised when input parameters do not make sense
+    """
+    try:
+        # reliability must be between 0 and 1
+        d = Destination(1, reliability=1.1)
+    except ValueError:
+        assert True
+    else:
+        assert False
+
+    try:
+        # learning rate must be between 0 and 1
+        d = Destination(1, learning_rate=-0.5)
+    except ValueError:
+        assert True
+    else:
+        assert False
 
 
 def test_use_socket_one_destination():
