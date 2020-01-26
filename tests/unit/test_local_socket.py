@@ -20,16 +20,29 @@ def test_initialization():
 
 def test_subscribe():
     """
-    Ensures that _subscribe method of hmap.network.AbstractSocket works in the
+    Ensures that _subscribe method of hmap.sockets.AbstractSocket works in the
     most basic capacity
     """
     s = LocalSocket.get_sockets(1)[0]
     s._subscribe(2, None)
 
+def test_subscribe_value_error():
+    """
+    Ensures that _subscribe method of hmap.sockets.AbstractSocket raises a value
+    error when more than one subscriber is being added for one id...
+    """
+    s = LocalSocket.get_sockets(1)[0]
+    s._subscribe(2, None)
+    try:
+        s._subscribe(2, None)
+    except ValueError:
+        assert True
+    else:
+        assert False
 
 def test_publish():
     """
-    Ensures that _publish method of hmap.network.AbstractSocket works in the
+    Ensures that _publish method of hmap.sockets.AbstractSocket works in the
     most basic capacity
     """
     s = LocalSocket.get_sockets(1)[0]
@@ -52,7 +65,6 @@ def get_callback():
 
     cb.log = []
     return cb
-
 
 def test_publish_subscribe_2_socket_network():
     """

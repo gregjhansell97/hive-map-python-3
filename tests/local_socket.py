@@ -18,6 +18,20 @@ class LocalSocket(AbstractSocket):
         self._sockets = []  # [(<LocalSocket>, <prob success>), ...]
 
     @staticmethod
+    def connect(u, v):
+        """
+        Connect two components that can use a socket
+
+        Args:
+            u: component 1
+            v: component 2
+        """
+        sockets = LocalSocket.get_sockets(2)
+        u.use(sockets[0])
+        v.use(sockets[1])
+
+
+    @staticmethod
     def get_sockets(size: int, reliability: float = 1.0):
         """
         Creates a fully connected network of local sockets

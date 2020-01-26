@@ -48,6 +48,12 @@ def test_use_socket_one_destination():
     d = Destination(1)
     s = LocalSocket.get_sockets(1)[0]
     d.use(s)
+    try:
+        d.use(s)
+    except ValueError:
+        assert True
+    else:
+        assert False
 
 
 def test_use_socket_multiple_destination():

@@ -33,6 +33,35 @@ def test_use_socket_one_location():
     s = LocalSocket.get_sockets(1)[0]
     l.use(s)
 
+def test_use_socket_one_location_over_use():
+    """
+    Verify that a provided socket can be used by a location
+    """
+    l = Location(1)
+    s = LocalSocket.get_sockets(1)[0]
+    l.use(s)
+    try:
+        l.use(s)
+    except ValueError:
+        assert True
+    else:
+        assert False
+
+def test_use_socket_one_duplicate_location():
+    """
+    Verify that a value error is raised when two location instances with the
+    same id (not inherently bad) use the same socket
+    """
+    l_1 = Location(1)
+    l_2 = Location(1)
+    s = LocalSocket.get_sockets(1)[0]
+    l_1.use(s)
+    try:
+        l_2.use(s)
+    except ValueError:
+        assert True
+    else:
+        assert False
 
 def test_use_socket_multiple_locations():
     """
@@ -51,13 +80,6 @@ def test_use_socket_multiple_times_on_location():
     l = Location(1)
     s = LocalSocket.get_sockets(1)[0]
     l.use(s)
-    try:
-        l.use(s)
-    except ValueError:
-        assert True
-    else:
-        assert False
-
 
 def test_use_sockets_one_location():
     """

@@ -103,7 +103,6 @@ class Destination:
         Args:
             body(bytes): raw bytes of message
         """
-        # create a random message id and append it
         msg_id = random.randint(0, 0xFFFFFFFF)
         self._sent_msg_ids.append(msg_id)
         # look to publish body
@@ -142,7 +141,6 @@ class Destination:
             # to do register h.id so that it can be ignored until refreshed
             self._rcvd_msg_ids.append(h.id)
             # publish ack
-            self._publish_ack(d, h.id)
             ack_h = LocHeader(LocHeader.ACK, d, h.id)
             ack_b = struct.pack("B", round(self.reliability * 255))
             socket._publish(self._target, LocHeader.serialize(ack_h, ack_b))
