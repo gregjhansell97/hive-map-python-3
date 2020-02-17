@@ -15,28 +15,62 @@ def get_callback():
     return cb
 
 
-def test_one_location_one_destination_direct_connection():
+def parametrize_test_one_location_one_destination_direct_connection(
+        reliability=1,
+        destination_reliability=(1, 1),
+        iterations=100
+    ):
     """
     Confirms the basic expectation that publishing a message
+
+    Args:
+        reliability: simulated connection reliability between the location
+            and destination
+        destination_reliability: expected destination reliability after running
+            communication channel
     """
     l = Location(1)
     d = Destination(1)
     cb = get_callback()
     l.subscribe(cb)
 
-    sockets = LocalSocket.get_sockets(2)
-    l.use(sockets[0])
-    d.use(sockets[1])
+    LocalSocket.connect(l, d, reliability=reliability)
 
     # for loop ensures that message dependibility doesn't decrease over time
-    for i in range(100):
+    for i in range(iterations):
         msgs = {b"hello world", b"127", b"my name is greg"}
         for m in msgs:
             d.publish(m)
-        assert cb.log == msgs, "sent messages should be received"
+        if reliability >= 1:
+            assert cb.log == msgs, "sent messages should be received"
+        else:
+            assert cb.log | msgs == msgs, "no weird messages"
+                    
         cb.log = set()
+    assert d.reliability >= destination_reliability[0]
+    assert d.reliability <= destination_reliability[1]
     assert d.distance == 1
-    assert d.reliability == 1.0
+
+def test_one_location_one_destination_direct_connection():
+    # basic network, perfect connection
+    parametrize_test_one_location_one_destination_direct_connection(
+            reliability=1,
+            destination_reliability=(1, 1),
+            iterations=100)
+
+    # when the network is overly-reliabile (same message sent more than once)
+    #parametrize_test_one_location_one_destination_direct_connection(
+    #        reliability=3,
+    #        destination_reliability=(1, 1))
+
+    # when network drops some messages
+    #parametrize_test_one_location_one_destination_direct_connection(
+    #        reliability=0.5,
+    #        destination_reliability=(1, 1),
+    #        iterations=100)
+    #parametrize_test_one_location_one_destination_direct_connection(
+    #    reliability=0.5,
+    #    expected_reliability=(0.3, 0.7))
 
 def test_one_location_two_destinations_indirect_connection():
     """
@@ -107,6 +141,11 @@ def test_one_location_five_interconnected_destinations():
     publish_messages(d3)
     publish_messages(d4)
     publish_messages(d5)
+    print(d1.reliability)
+    print(d2.reliability)
+    print(d3.reliability)
+    print(d4._distances_table)
+    print(d5.reliability)
     assert d1.distance == 1
     assert d2.distance == 1
     assert d3.distance == 2

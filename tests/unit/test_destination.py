@@ -117,7 +117,7 @@ def test_update_distance():
     for i in range(100):
         r = d.reliability
         d._decrement_reliability(3)
-        d._increment_reliability(3, 1)
+        d._increment_reliability(3, 1, 0)
         assert d.reliability >= r
     assert d.distance == 3
     for i in range(100):
@@ -128,17 +128,17 @@ def test_update_distance():
     assert d.distance == math.inf
     for i in range(100):
         d._decrement_reliability(3)
-        d._increment_reliability(3, 0.5)
+        d._increment_reliability(3, 0.5, 0)
     assert d.distance == math.inf
     assert d.reliability > 0.4
     for i in range(100):
         d._decrement_reliability(2)
-        d._increment_reliability(2, 0.85)
+        d._increment_reliability(2, 0.85, 0)
     assert d.distance == 3
     assert d.reliability > 0.9
     for i in range(100):
         d._decrement_reliability(4)
-        d._increment_reliability(4, 0)
-        d._increment_reliability(3, 0.5)
-        d._increment_reliability(2, 0.85)
+        d._increment_reliability(4, 0, 0)
+        d._increment_reliability(3, 0.5, 0)
+        d._increment_reliability(2, 0.85, 0)
     assert d.distance == 3

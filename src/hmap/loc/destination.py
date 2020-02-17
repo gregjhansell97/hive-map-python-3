@@ -50,7 +50,7 @@ class Destination:
         # value: (<prob of success>, <decrement count>)
         self._distances_table = defaultdict(lambda: (0.0, 0))
         # prevents redundant messages (both sending and receiving)
-        self._sent_msg_ids = deque(maxlen=10)
+        self._sent_msg_ids = []
         self._rcvd_msg_ids = deque(maxlen=10)
 
     @property
@@ -104,7 +104,9 @@ class Destination:
             body(bytes): raw bytes of message
         """
         msg_id = random.randint(0, 0xFFFFFFFF)
-        self._sent_msg_ids.append(msg_id)
+        self._sent_msg_ids.insert(0, msg_id)
+        self._sent_msg_ids = self._sent_msg_ids[:10]
+        #self._sent_msg_ids.append(msg_id)
         # look to publish body
         d = self.distance
         h = LocHeader(LocHeader.PUB, d, msg_id)
@@ -138,7 +140,7 @@ class Destination:
                 return  # further away, can't do anything
             elif h.id in self._rcvd_msg_ids:
                 return  # likely already received message
-            # to do register h.id so that it can be ignored until refreshed
+            # TODO register h.id so that it can be ignored until refreshed
             self._rcvd_msg_ids.append(h.id)
             # publish ack
             ack_h = LocHeader(LocHeader.ACK, d, h.id)
@@ -149,8 +151,22 @@ class Destination:
         elif h.type == LocHeader.ACK:  # acknowledge message
             ack_distance = h.distance
             ack_prob = struct.unpack("B", b)[0] / 255
-            if h.id in self._sent_msg_ids:  # likely a good ack
-                self._increment_reliability(ack_distance + 1, ack_prob)
+            try:
+                index = self._sent_msg_ids.index(h.id)
+            except ValueError:
+                pass
+            else:
+                if h.id not in self._rcvd_msg_ids:
+                    self._increment_reliability(
+                            ack_distance + 1, 
+                            ack_prob, 
+                            index)
+                    # not this simple because could receive multiple acks from
+                    # different distances away and that should affect the
+                    # probability (as its another distance away...) perhaps
+                    # acks at different distances but still don't want to just
+                    # hard code that... 
+                    self._rcvd_msg_ids.append(h.id)
 
     def _decrement_reliability(self, distance):
         """
@@ -173,7 +189,7 @@ class Destination:
                 del self._distances_table[d]
         self._refresh_distance_and_reliability()
 
-    def _increment_reliability(self, distance, p_new):
+    def _increment_reliability(self, distance, p_new, age):
         """
         Internal method that modifies _distances_table member based on new 
         information about a distance of a neighbor and its propability of 
@@ -185,15 +201,24 @@ class Destination:
             prob(float): probability message will be successfully delivered
                 bounded by [0, 1]
         """
+        # p is probability of success
+        # c is count of missing messages
         p, c = self._distances_table[distance]
         c = 0 if p == 0 else c
-        p_new = p_new
+        #p_new = p_new
         delta = self._learning_rate
-        if c > 0:
-            c -= 1
-            p_new = p + delta * (p_new) * ((1 - delta) ** (c))
-        else:
-            p_new = p + delta * p_new * (1 - p)
+
+        #print(age)
+        p_new = p + delta*(p_new)*((1-delta)**age)
+
+        #MODIFIED
+        #if c > 0:
+        #    c -= 1
+        #    p_new = p + delta * (p_new) * ((1 - delta) ** (c))
+        #else:
+        #    p_new = p + delta * p_new * (1 - p)
+        #MODIFIED
+
         self._distances_table[distance] = (p_new, c)
         self._refresh_distance_and_reliability()
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import math
 import random
 
 from hmap.sockets import AbstractSocket
@@ -13,12 +14,12 @@ class LocalSocket(AbstractSocket):
     interactions between nodes
     """
 
-    def __init__(self):
+    def __init__(self, ):
         super().__init__()
         self._sockets = []  # [(<LocalSocket>, <prob success>), ...]
 
     @staticmethod
-    def connect(u, v):
+    def connect(u, v, **kwargs):
         """
         Connect two components that can use a socket
 
@@ -26,7 +27,7 @@ class LocalSocket(AbstractSocket):
             u: component 1
             v: component 2
         """
-        sockets = LocalSocket.get_sockets(2)
+        sockets = LocalSocket.get_sockets(2, **kwargs)
         u.use(sockets[0])
         v.use(sockets[1])
 
@@ -39,7 +40,8 @@ class LocalSocket(AbstractSocket):
         Args:
             size: number of sockets in inter-connected-socket-network
             reliability: probability of success that a message sent from one 
-            socket gets to another socket
+                socket gets to another socket, if over 1, there are potentially
+                multiple sends
 
         Returns:
             (list): list of LocalSocket instances all interconnected
@@ -64,7 +66,9 @@ class LocalSocket(AbstractSocket):
 
         Args:
             socket: socket connecting to
-            prob: probability that messages sent to the socket will make it
+            prob: probability that messages sent to the socket will make it, if
+                value is over 1 then there are potentially multiple sends of
+                data
         """
         self._sockets.append((socket, prob))
 
@@ -74,5 +78,8 @@ class LocalSocket(AbstractSocket):
         probability corresponding to the socket
         """
         for s, prob in self._sockets:
-            if random.random() < prob:
-                s.deliver(data)
+            attempts = math.ceil(prob)
+            prob = prob/attempts
+            for _ in range(attempts):
+                if random.random() < prob:
+                    s.deliver(data)
