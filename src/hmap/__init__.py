@@ -1,3 +1,3 @@
-from hmap.loc import Destination, Location
+from hmap.transceiver import Transceiver
 
-__all__ = ["Destination", "Location"]
+__all__ = ["Transceiver"]
