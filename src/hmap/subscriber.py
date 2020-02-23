@@ -3,6 +3,7 @@
 
 from hmap.transceiver import Transceiver
 
+
 class Subscriber:
     """
     Responsible for invoking callbacks when messages of a certain topic are
@@ -12,6 +13,7 @@ class Subscriber:
         Current algorithm floods the network with message, there is no feedback
         and message drops are not handled
     """
+
     def __init__(self, topic: int, cb):
         """
         """
@@ -32,6 +34,7 @@ class Subscriber:
         can receive are published messages for now, but I can imagine a world
         where heart beats from other subscribers are broadcasted, so they can
         hear those too, but maybe should ignore them... LET THE ROUTER WORRY
-        ABOUT THAT.
+        ABOUT THAT. If it hears an ack from a subscriber but it didn't hear that
+        item them it could raise some sort of earro
         """
         raise NotImplementedError

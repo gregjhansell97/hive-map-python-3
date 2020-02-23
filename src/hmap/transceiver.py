@@ -3,14 +3,16 @@
 
 from abc import ABC, abstractmethod
 
+
 class Transceiver(ABC):
     """
     Layer below the network that transmits and receives messages from anonymous
     connections
     """
+
     def __init__(self):
         # callbacks have arguments (transceiver, data) in that order
-        self._callbacks = [] #list of callbacks that get invoked on recv
+        self._callbacks = []  # list of callbacks that get invoked on recv
 
     @abstractmethod
     def transmit(self, data: bytes):

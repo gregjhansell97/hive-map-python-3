@@ -11,6 +11,7 @@ import struct
 PUB = 1
 ACK = 2
 
+
 class Message:
     @staticmethod
     def serialize(msg_type, header, body):
@@ -19,12 +20,12 @@ class Message:
         return msg_type + header + body
 
     @staticmethod
-    def deserialize(msg:bytes):
+    def deserialize(msg: bytes):
         # determine the message type
         print(msg)
         fmt = "B"
         size = struct.calcsize(fmt)
-        msg_type, = struct.unpack(fmt, msg[:size])
+        (msg_type,) = struct.unpack(fmt, msg[:size])
         # move past the message type
         msg = msg[size:]
         # extract header
@@ -36,7 +37,8 @@ class Message:
         body = msg[size:]
         return (msg_type, header, body)
 
+
 Message.formats = {
-    PUB: "I", # "ideally" unique message id
-    ACK: "I"  # "ideally" unique message id
+    PUB: "I",  # "ideally" unique message id
+    ACK: "I",  # "ideally" unique message id
 }

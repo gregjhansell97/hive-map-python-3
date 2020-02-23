@@ -10,6 +10,7 @@
 
 from tests.local_transceiver import LocalTransceiver
 
+
 def pytest_generate_tests(metafunc):
     if "Transceiver" in metafunc.fixturenames:
         metafunc.parametrize("Transceiver", [LocalTransceiver])

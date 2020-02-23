@@ -12,7 +12,7 @@ class LocalTransceiver(Transceiver):
 
     def __init__(self):
         super().__init__()
-        self._connections = [] 
+        self._connections = []
 
     @staticmethod
     def connect(nodes=[], **kwargs):

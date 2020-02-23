@@ -6,6 +6,7 @@ import random
 from hmap.transceiver import Transceiver
 from hmap.message import Message, PUB
 
+
 class Publisher:
     """
     Responsible for publishing information (to a specific topic) using 
@@ -15,6 +16,7 @@ class Publisher:
         Current algorithm floods the network with message, there is no feedback
         and message drops are not handled
     """
+
     def __init__(self, topic: int):
         self._topic = topic
         self._trxs = []
@@ -23,7 +25,7 @@ class Publisher:
     def use(self, trx: Transceiver):
         self._trxs.append(trx)
 
-    def publish(self, data:bytes):
+    def publish(self, data: bytes):
         # need a message id (do not worry about ttl yet...)
         msg_type = PUB
         header = (random.randint(0, 65535),)
@@ -52,4 +54,3 @@ class Publisher:
             because it would be way more efficient if 
         # what to do here?
     """
-
