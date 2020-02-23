@@ -10,8 +10,6 @@ import pytest
 
 from hmap import Subscriber
 
-from tests.local_transceiver import LocalTransceiver
-
 def get_callback():
     """
     Creates a callback instance that tracks invocations. This function was
@@ -31,18 +29,18 @@ def test_initialization():
     cb = get_callback()
     s = Subscriber(10, cb)
 
-def test_use_transceiver():
+def test_use_transceiver(Transceiver):
     cb = get_callback()
     # set up publisher
     s = Subscriber(10, cb)
-    t = LocalTransceiver()
+    t = Transceiver()
     s.use(t)
 
-def test_use_multiple_transceivers():
+def test_use_multiple_transceivers(Transceiver):
     # set up publisher
     cb = get_callback()
     s = Subscriber(5, cb)
-    ts = [LocalTransceiver() for _ in range(10)]
+    ts = [Transceiver() for _ in range(10)]
     for t in ts:
         s.use(t)
 

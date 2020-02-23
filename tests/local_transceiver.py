@@ -42,7 +42,7 @@ class LocalTransceiver(Transceiver):
         for t_i in connections:
             for t_j in connections:
                 if t_i is not t_j:
-                    t_i.connect(t_j)
+                    t_i._connect(t_j)
         return connections
 
     @property
@@ -52,7 +52,7 @@ class LocalTransceiver(Transceiver):
         """
         return self._connections
 
-    def connect(self, connection: Transceiver):
+    def _connect(self, connection: Transceiver):
         """
         Connects one local transceiver to another. The connection is one-way.
 

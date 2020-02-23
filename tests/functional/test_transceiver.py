@@ -8,9 +8,6 @@ Unit tests for LocalSocket; the main target of these tests is AbstractSocket
 from collections import defaultdict
 import pytest
 
-from tests.local_transceiver import LocalTransceiver
-
-
 def get_callback():
     """
     Creates a callback instance that tracks invocations. This function was
@@ -19,7 +16,7 @@ def get_callback():
     Returns (lambda t, d): callback that takes in a transceiver and data as
         arguments
     """
-    def cb(t: LocalTransceiver, data: bytes):
+    def cb(t, data: bytes):
         # callbacks for transceivers expects a transceiver instance and 
         # raw-bytes being received
         cb.log.append((t, data))
@@ -27,27 +24,27 @@ def get_callback():
     return cb
 
 
-def test_initialization():
+def test_initialization(Transceiver):
     """
     Ensures that local transceivers can be created
     """
-    connections = LocalTransceiver.get_connections(10)
+    connections = Transceiver.get_connections(10)
 
-def test_subscribe():
+def test_subscribe(Transceiver):
     """
     Ensures that _subscribe method of hmap.Transceiver works as expected
     """
-    t = LocalTransceiver.get_connections(10)[0]
+    t = Transceiver.get_connections(10)[0]
     t._subscribe(None)
 
-def test_publish_subscribe_2_socket_network():
+def test_publish_subscribe_2_socket_network(Transceiver):
     """
     Create two transceivers and have one transmit data and the other receive 
     that data
     """
     cb = get_callback()
 
-    connections = LocalTransceiver.get_connections(2)
+    connections = Transceiver.get_connections(2)
     connections[1]._subscribe(cb)
     p_count = 10
     # go through and publish data
@@ -55,14 +52,14 @@ def test_publish_subscribe_2_socket_network():
         connections[0].transmit(b"hello world")
     assert cb.log == [(connections[1], b"hello world")] * 10
 
-def test_publish_subscribe_multiple_socket_network():
+def test_publish_subscribe_multiple_socket_network(Transceiver):
     """
     Creates several transceivers on the same network and verifies that successful
     transmissions
     """
     cb = get_callback()
 
-    connections = LocalTransceiver.get_connections(10)
+    connections = Transceiver.get_connections(10)
     # each socket has their own callback
     callbacks = [get_callback() for _ in connections]
 
