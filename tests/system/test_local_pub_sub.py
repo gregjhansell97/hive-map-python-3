@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Tests pub-sub network without routers involved, mostly analyzes the interaction
+between subscribers and publishers
+"""
+
 import pytest
 
 from hmap import Subscriber, Publisher
@@ -9,6 +14,10 @@ from tests.functional.test_subscriber import get_callback
 
 
 def test_one_pub_one_sub_one_connection(Transceiver):
+    """
+    Get one publisher instance and one subscriber instance and connect them
+    over the same topic and confirm that messages get sent 
+    """
     TOPIC = 10
     p = Publisher(TOPIC)
     cb = get_callback()
@@ -22,6 +31,11 @@ def test_one_pub_one_sub_one_connection(Transceiver):
 
 
 def test_one_pub_one_sub_many_connections(Transceiver):
+    """
+    Get one publisher instance and one subscriber instance and connect them
+    with multiple transceivers and verify that the message only gets delivered
+    once... is that a property we want to enforce to some capacity?
+    """
     TOPIC = 10
     p = Publisher(TOPIC)
     cb = get_callback()
@@ -36,6 +50,10 @@ def test_one_pub_one_sub_many_connections(Transceiver):
 
 
 def test_one_pub_many_sub(Transceiver):
+    """
+    Get one publisher instance and many subscribers and verify that the 
+    messages are published to all subscribers
+    """
     TOPIC = 10
     DIFF_TOPIC = 11
     p = Publisher(TOPIC)
@@ -61,6 +79,10 @@ def test_one_pub_many_sub(Transceiver):
 
 
 def test_many_pub_one_sub(Transceiver):
+    """
+    Get many publisher instances and many subscribers and verify that the 
+    messages are published to the subscriber
+    """
     TOPIC = 10
     DIFF_TOPIC = 11
     pubs = [Publisher(TOPIC) for _ in range(10)]
@@ -87,6 +109,10 @@ def test_many_pub_one_sub(Transceiver):
 
 
 def test_many_pub_many_sub(Transceiver):
+    """
+    Get many publisher instances and many subscribers and verify that the 
+    messages are published to all subscribers
+    """
     TOPIC = 10
     DIFF_TOPIC = 11
     pubs = [Publisher(TOPIC) for _ in range(10)]

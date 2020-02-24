@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+"""
+Module that house LocalTransceiver which is used as a Transceiver parameter
+for al the tests
+"""
+
 from hmap.transceiver import Transceiver
 
 
@@ -7,7 +13,9 @@ class LocalTransceiver(Transceiver):
     """
     Interacts with other transceivers on the same thread and process. 
     LocalTransceiver is not thread-safe and is intended for testing purposes: 
-    spoofing up interactions between subscribers, publishers, and routers
+    spoofing up interactions between subscribers, publishers, and routers. The
+    connections are a chain of method invocations; this makes the class ideal
+    for tests because it behaves consistently
     """
 
     def __init__(self):
@@ -17,13 +25,14 @@ class LocalTransceiver(Transceiver):
     @staticmethod
     def connect(nodes=[], **kwargs):
         """
-        Connect two components that can use transceivers
+        Connect a list of components such that all components use transceiver
+        that can communicate with one another
 
         Args:
-            u: component 1
-            v: component 2
+            nodes: list of components to connect with one another
         """
         connections = LocalTransceiver.get_connections(len(nodes), **kwargs)
+        # iterate through and have each node use a different transceiver
         for n, t in zip(nodes, connections):
             n.use(t)
 
@@ -63,8 +72,10 @@ class LocalTransceiver(Transceiver):
 
     def transmit(self, data: bytes):
         """
-        Iterates through all connections and invokes their receive methods with 
-        a probability corresponding to the socket
+        Iterates through all connections and invokes their receive methods
+
+        Args:
+            data: bytes that connections will receive
         """
         for t in self._connections:
             t.receive(data)

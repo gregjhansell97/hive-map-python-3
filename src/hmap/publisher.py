@@ -1,5 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Facilitates publishing of topics. Publisher part of framework for the
+pub-sub paradigm of hive-map
+
+IDEAS/QUESTIONS:
+- should a publisher be able to receive messages
+* (2/23/20): I don't think they should because a publisher is going to be the
+    weakest link in the network with the most SWaP dependence so it should do
+    as little as possible. There would be some benefits to publisher having
+    back-and-forth communication with routers/subscribers such as error
+    detection; in a way that goes against the pub-sub paradigm. If a publisher
+    publishes something, it shouldn't are what is listening. 
+* (2/23/20): To consider failurs: what if there ar eno subscribers? message-id
+    conflicts? matching message id from othe rmessages? no acks received? other
+    messages publishing (don't flood network...)
+* (2/23/20): What if nodes look for surounding nodes to find an identity, like
+    a local (neighboring) agreement on a unique id...
+* (2/23/20): I want to leave the routing to the routing nodes, I think it's 
+    their responsibility... the publisher should be a lazy (low power) as
+    possible
+"""
 
 import random
 
@@ -23,34 +44,24 @@ class Publisher:
         self._stale_ids = []
 
     def use(self, trx: Transceiver):
+        """
+        Provide access to a transceiver that the publisher can use to disperse
+        its information
+
+        Args:
+            trx: transceiver publs
+        """
         self._trxs.append(trx)
 
     def publish(self, data: bytes):
+        """
+        Publish raw data to a topic, ideally subscribers of the topic receive
+        this data
+
+        Args:
+            data: raw data being published
+        """
         # need a message id (do not worry about ttl yet...)
         msg_type = PUB
         header = (random.randint(0, 65535),)
         msg = Message.serialize(msg_type, header, data)
-
-    """
-    def _receive(self, transceiver: Transceiver, raw_data: bytes):
-        maybe all of these come down to the router nodes, like should a
-        Publisher be as dumb as possible, and only have a range of 1 hop and
-        then hope that it gets to a router
-        Possible items to be received:
-            errors:
-                - you shouldn't care if publish has an error, all a publisher
-                    is doing is its own thing and if someone wants to listen
-                    by all means... its not the publishers job to worry about
-                    that!
-                failure to reach subscribers (what if there is no subscribers?)
-                message-id conflict (potentially change name...)
-                matching message id from other message
-                no acks received (what is a good timeout for that...)
-            other messages publishing, but as a publisher do you really
-                care about other messages published... could result in flooding
-                the network
-            what if nodes that enter the network as the surrounding nodes for an
-            identity and then they route messages based on given identities
-            because it would be way more efficient if 
-        # what to do here?
-    """

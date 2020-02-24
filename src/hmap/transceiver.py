@@ -7,7 +7,8 @@ from abc import ABC, abstractmethod
 class Transceiver(ABC):
     """
     Layer below the network that transmits and receives messages from anonymous
-    connections
+    connections. Is a tool used by the main components: Publisher, Router and
+    Subscriber
     """
 
     def __init__(self):
@@ -27,8 +28,8 @@ class Transceiver(ABC):
 
     def receive(self, data: bytes):
         """
-        Invoked by child class to deliver messages received to socket. Acts as
-        the original event driver
+        Invoked by child class to deliver messages received to transceiver. Acts 
+        as the original event driver
 
         Args:
             data: raw bytes delivered to socket

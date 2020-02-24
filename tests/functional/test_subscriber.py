@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Unit tests for LocalSocket; the main target of these tests is AbstractSocket
+Unit tests for Subscriber. Does not test actual receiving of messages, that is
+in the system tests
 """
 
 from collections import defaultdict
@@ -14,7 +15,8 @@ from hmap import Subscriber
 def get_callback():
     """
     Creates a callback instance that tracks invocations. This function was
-    created because a lot of tests create a callback!
+    created because a lot of tests create a callback, especially the system
+    tests!
     
     Returns (lambda t, d): callback that takes in a transceiver and data as
         arguments
@@ -30,11 +32,17 @@ def get_callback():
 
 
 def test_initialization():
+    """
+    Verifies subscriber can take in a topic and callback without crashing
+    """
     cb = get_callback()
     s = Subscriber(10, cb)
 
 
 def test_use_transceiver(Transceiver):
+    """
+    Verifies subscriber can use a transceiver without crashing
+    """
     cb = get_callback()
     # set up publisher
     s = Subscriber(10, cb)
@@ -43,6 +51,9 @@ def test_use_transceiver(Transceiver):
 
 
 def test_use_multiple_transceivers(Transceiver):
+    """
+    Verifies subscriber can use multiple tranceivers without crashing
+    """
     # set up publisher
     cb = get_callback()
     s = Subscriber(5, cb)

@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Facilitates receiving published messages of a certain topic. Subscriber part
+of pub-sub paradigm of hive-map
+"""
+
 from hmap.transceiver import Transceiver
 
 
@@ -15,14 +20,17 @@ class Subscriber:
     """
 
     def __init__(self, topic: int, cb):
-        """
-        """
         self._topic = topic
         self._callback = cb
         self._trxs = []
 
     def use(self, trx: Transceiver):
         """
+        Provide access to a transceiver that the subscriber can use to disperse
+        and receive information about topics and routers
+
+        Args:
+            trx: transceiver publs
         """
         trx._subscribe(self._on_recv)
         self._trxs.append(trx)
