@@ -7,6 +7,7 @@ of pub-sub paradigm of hive-map
 """
 
 from hmap.transceiver import Transceiver
+from hmap.message import Message, PUB, ACK
 
 
 class Subscriber:
@@ -23,6 +24,7 @@ class Subscriber:
         self._topic = topic
         self._callback = cb
         self._trxs = []
+        self._stale_ids = []
 
     def use(self, trx: Transceiver):
         """
@@ -43,6 +45,17 @@ class Subscriber:
         where heart beats from other subscribers are broadcasted, so they can
         hear those too, but maybe should ignore them... LET THE ROUTER WORRY
         ABOUT THAT. If it hears an ack from a subscriber but it didn't hear that
-        item them it could raise some sort of earro
+        item them it could raise some sort of earro or ask for the information
         """
-        raise NotImplementedError
+        msg_type, header, body = Message.deserialize(data)
+        if msg_type == PUB:
+            msg_id, msg_topic = header
+            if msg_id in self._stale_ids:
+                # remove id (will add to front in the next few lines)
+                self._stale_ids.remove(msg_id)
+            elif self._topic == msg_topic:
+                self._callback(body)
+            # add message id to the front
+            self._stale_ids.insert(0, msg_id)
+            self._stale_ids = self._stale_ids[:50]
+

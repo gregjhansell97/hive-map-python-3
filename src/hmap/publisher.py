@@ -61,7 +61,11 @@ class Publisher:
         Args:
             data: raw data being published
         """
-        # need a message id (do not worry about ttl yet...)
         msg_type = PUB
-        header = (random.randint(0, 65535),)
+        msg_id = random.randint(0, 65535)
+        while msg_id in self._stale_ids:
+            msg_id = random.randint(0, 65535)
+        header = (msg_id, self._topic)
         msg = Message.serialize(msg_type, header, data)
+        for t in self._trxs:
+            t.transmit(msg)

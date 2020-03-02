@@ -22,7 +22,6 @@ def test_one_pub_one_sub_one_connection(Transceiver):
     p = Publisher(TOPIC)
     cb = get_callback()
     s = Subscriber(TOPIC, cb)
-    assert Transceiver == LocalTransceiver
     Transceiver.connect([p, s])
     p.publish(b"hello")
     assert cb.log == [b"hello"]
@@ -40,7 +39,6 @@ def test_one_pub_one_sub_many_connections(Transceiver):
     p = Publisher(TOPIC)
     cb = get_callback()
     s = Subscriber(TOPIC, cb)
-    assert Transceiver == LocalTransceiver
     for i in range(10):
         Transceiver.connect([p, s])
     p.publish(b"hello")
@@ -71,7 +69,7 @@ def test_one_pub_many_sub(Transceiver):
     for cb in diff_sub_callbacks:
         assert cb.log == []
 
-    p.publish("goodbye")
+    p.publish(b"goodbye")
     for cb in sub_callbacks:
         assert cb.log == [b"hello", b"goodbye"]
     for cb in diff_sub_callbacks:
@@ -98,7 +96,7 @@ def test_many_pub_one_sub(Transceiver):
     expected_log.append(b"hello")
     assert cb.log == expected_log
 
-    for p in different_pubs:
+    for p in diff_pubs:
         p.publish(b"kaput")
     assert cb.log == [b"hello"]
 

@@ -18,8 +18,7 @@ def get_callback():
     created because a lot of tests create a callback, especially the system
     tests!
     
-    Returns (lambda t, d): callback that takes in a transceiver and data as
-        arguments
+    Returns (lambda d): callback that takes in data as argument
     """
 
     def cb(data: bytes):

@@ -65,6 +65,6 @@ class Message:
 
 
 Message.formats = {
-    PUB: "I",  # "ideally" unique message id
+    PUB: "II",  # "ideally" unique message id and topic
     ACK: "I",  # "ideally" unique message id
 }
