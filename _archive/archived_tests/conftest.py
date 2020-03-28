@@ -15,9 +15,6 @@ def pytest_generate_tests(metafunc):
     """
     Customize test functions however needed
     """
-    '''
     if "Transceiver" in metafunc.fixturenames:
         # parameterized transceivers
         metafunc.parametrize("Transceiver", [LocalTransceiver])
-    '''
-    pass

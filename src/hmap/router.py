@@ -1,53 +1,56 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Facilitates routing published messages to interested subscribers
 
-# TODO:
-# - fill out interface
-# - document
-# - implementation (pub-sub impl?)
+Example:
+    from hmap import Router
+    r = Router()
 
-from hmap.transceiver import Transceiver
-from hmap.message import Message, PUB, ACK
-
+Todo:
+    * write Subscriber.transceiver setter
+    * default handler, serializer, uid
+"""
 
 class Router:
-    """
-    Responsible for forwarding messages received by publisher to other
-    subscribers and routers
+    """Responsible for routing published messages to subscribers"""
 
-    Algorithm:
-        Current algorithm floods the network with message, there is no feedback
-        and message drops are not handled
-    """
-
-    def __init__(self):
-        self._trxs = []
-        self._stale_ids = []
-
-    def use(self, trx: Transceiver):
+    def __init__(
+            self, 
+            uid=None,
+            heartbeat_rate=0.0,
+            topic_handler=None,
+            msg_serializer=None,
+            transceiver=None):
         """
-        Provide access to a transceiver that the subscriber can use to disperse
-        and receive information about topics and routers
-
         Args:
-            trx: transceiver publs
+            uid(bytes): Unique identifier
+            heartbeat_rate(float): allowable synchronization transmissions rate
+            topic_handler(TopicHandler): Handles serialization and comparason
+                of topics
+            msg_serializer(MsgSerializer): Serializes messages
+            transceiver(Transceiver): Transceiver used to transmit and 
+                receive data
         """
-        trx._subscribe(self._on_recv)
-        self._trxs.append(trx)
+        self._uid = uid
+        self._hbeat = heartbeat_rate
+        self._topic_handler = topic_handler
+        self._msg_serializer = msg_serializer
+        self._trx = transceiver
+        raise NotImplementedError
 
-    def _on_recv(self, trx: Transceiver, data: bytes):
-        """
-        """
-        msg_type, header, body = Message.deserialize(data)
-        if msg_type == PUB:
-            msg_id, msg_topic = header
-            if msg_id in self._stale_ids:
-                # remove id (will add to front in the next few lines)
-                self._stale_ids.remove(msg_id)
-            # add message id to the front
-            self._stale_ids.insert(0, msg_id)
-            self._stale_ids = self._stale_ids[:50]
-            # send to all channels
-            for t in self._trxs:
-                t.transmit(data)
+    @property
+    def uid(self):
+        """bytes: Unique identifier"""
+        return self._uid
 
+    @property
+    def transceiver(self);
+        """Transceiver: Transceiver used to transmit data"""
+        return self._trx
+    @self.transceiver.setter
+    def transceiver(self, trx):
+        raise NotImplementedError
+
+    @property
+    def heartbeat_rate(self):
+        return self._hbeat

@@ -1,71 +1,66 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Facilitates publishing of topics. Publisher part of framework for the
-pub-sub paradigm of hive-map
+"""Facilitates publishing
 
-IDEAS/QUESTIONS:
-- should a publisher be able to receive messages
-* (2/23/20): I don't think they should because a publisher is going to be the
-    weakest link in the network with the most SWaP dependence so it should do
-    as little as possible. There would be some benefits to publisher having
-    back-and-forth communication with routers/subscribers such as error
-    detection; in a way that goes against the pub-sub paradigm. If a publisher
-    publishes something, it shouldn't are what is listening. 
-* (2/23/20): To consider failurs: what if there ar eno subscribers? message-id
-    conflicts? matching message id from othe rmessages? no acks received? other
-    messages publishing (don't flood network...)
-* (2/23/20): What if nodes look for surounding nodes to find an identity, like
-    a local (neighboring) agreement on a unique id...
-* (2/23/20): I want to leave the routing to the routing nodes, I think it's 
-    their responsibility... the publisher should be a lazy (low power) as
-    possible
+Example:
+    from hmap import Publisher
+    p = Publisher()
+    p.publish("weather.vt.killington", "rainy")
+
+Todo:
+    * write Publisher.publish implementation
+    * default handler, serializer, transceiver, id
 """
 
-import random
-
-from hmap.transceiver import Transceiver
-from hmap.message import Message, PUB
+import uuid
 
 
 class Publisher:
-    """
-    Responsible for publishing information (to a specific topic) using 
-    transceivers provided
+    """Responsible for publishing information using transceivers provided"""
 
-    Algorithm:
-        Current algorithm floods the network with message, there is no feedback
-        and message drops are not handled
-    """
-
-    def __init__(self, topic: int):
-        self._topic = topic
-        self._trxs = []
-        self._stale_ids = []
-
-    def use(self, trx: Transceiver):
+    def __init__(
+            self, 
+            uid=None,
+            topic_handler=None, 
+            msg_serializer=None, 
+            transceiver=None):
         """
-        Provide access to a transceiver that the publisher can use to disperse
-        its information
+        Args:
+            uid(bytes): Unique identifier of publisher
+            topic_handler(TopicHandler): Handles serialization and comparason
+                of topics. Must be consistent throughout hivemap infrastructure
+            msg_serializer(MsgSerializer): Serializes messages. Must be
+                consistent throughout hivemap infrastructure
+            transceiver(Transceiver): Transceiver used to transmit data
+
+        Raises:
+            ValueError: argument types are not followed
+        """
+        # TODO: check types
+        self._uid = uid
+        self._topic_handler = topic_handler
+        self._msg_serializer= msg_serializer
+        self._trx = transceiver
+        raise NotImplementedError
+
+    @property
+    def uid(self):
+        """bytes: Unique identifier of publisher"""
+        return self._uid
+    @property
+    def transceiver(self):
+        """Transceiver: Transceivers used to transmit data"""
+        return self._trx
+    @self.transceiver.setter
+    def transceiver(self, trx):
+        raise NotImplementedError
+
+    def publish(self, topic, data):
+        """Publish data of a certain topic
 
         Args:
-            trx: transceiver publs
+            topic: topic to publish data to
+            data: information being published
         """
-        self._trxs.append(trx)
-
-    def publish(self, data: bytes):
-        """
-        Publish raw data to a topic, ideally subscribers of the topic receive
-        this data
-
-        Args:
-            data: raw data being published
-        """
-        msg_type = PUB
-        msg_id = random.randint(0, 65535)
-        while msg_id in self._stale_ids:
-            msg_id = random.randint(0, 65535)
-        header = (msg_id, self._topic)
-        msg = Message.serialize(msg_type, header, data)
-        for t in self._trxs:
-            t.transmit(msg)
+        # TODO
+        raise NotImplementedError

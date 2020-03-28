@@ -1,61 +1,64 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Facilitates subscriptions
 
+Example:
+    from hmap import Subscriber
+    s = Subscriber()
+    s.subscribe("weather.vt.killington", on_killington_weather)
+
+Todo:
+    * write Subscriber.transceiver setter
+    * default handler, serializer, uid
+
+Idea:
+    * only one transceiver required (can be a conglomeration of transceivers)
+    * it's okay not to have a transceiver: subscribers, routers and publishers
+        can interact over thread/asyncio with threadpool
+        
 """
-Facilitates receiving published messages of a certain topic. Subscriber part
-of pub-sub paradigm of hive-map
-"""
-
-from hmap.transceiver import Transceiver
-from hmap.message import Message, PUB, ACK
-
 
 class Subscriber:
-    """
-    Responsible for invoking callbacks when messages of a certain topic are
-    received
+    """Responsible for subscribing a callback to a topic"""
 
-    Algorithm:
-        Current algorithm floods the network with message, there is no feedback
-        and message drops are not handled
-    """
-
-    def __init__(self, topic: int, cb):
-        self._topic = topic
-        self._callback = cb
-        self._trxs = []
-        self._stale_ids = []
-
-    def use(self, trx: Transceiver):
+    def __init__(
+            self, 
+            uid=None,
+            heartbeat_rate=0.0,
+            topic_handler=None,
+            msg_serializer=None,
+            transceiver=None):
         """
-        Provide access to a transceiver that the subscriber can use to disperse
-        and receive information about topics and routers
-
         Args:
-            trx: transceiver publs
+            uid(bytes): Unique identifier 
+            heartbeat_rate(float): allowable synchronization transmissions rate
+            topic_handler(TopicHandler): Handles serialization and comparason
+                of topics
+            msg_serializer(MsgSerializer): Serializes messages
+            transceiver(Transceiver): Transceiver used to transmit and
+                receive data
         """
-        trx._subscribe(self._on_recv)
-        self._trxs.append(trx)
+        self._uid = uid
+        self._hbeat = heartbeat_rate
+        self._topic_handler = topic_handler
+        self._msg_serializer = msg_serializer
+        self._trx = transceiver
+        raise NotImplementedError
+    @property
+    def uid(self):
+        """bytes: Unique identifier"""
+        return self._uid
+    @property
+    def transceiver(self):
+        """Transceiver: Transceiver used to transmit data"""
+        return self._trx
+    @self.transceiver.setter
+    def transceiver(self, trx):
+        raise NotImplementedError
 
-    def _on_recv(self, trx: Transceiver, data: bytes):
-        """
-        Receivers are listening for published messages, so I am assuming that
-        they likely have the capacity to respond back... so the messages they
-        can receive are published messages for now, but I can imagine a world
-        where heart beats from other subscribers are broadcasted, so they can
-        hear those too, but maybe should ignore them... LET THE ROUTER WORRY
-        ABOUT THAT. If it hears an ack from a subscriber but it didn't hear that
-        item them it could raise some sort of earro or ask for the information
-        """
-        msg_type, header, body = Message.deserialize(data)
-        if msg_type == PUB:
-            msg_id, msg_topic = header
-            if msg_id in self._stale_ids:
-                # remove id (will add to front in the next few lines)
-                self._stale_ids.remove(msg_id)
-            elif self._topic == msg_topic:
-                self._callback(body)
-            # add message id to the front
-            self._stale_ids.insert(0, msg_id)
-            self._stale_ids = self._stale_ids[:50]
+    @property
+    def heartbeat_rate(self):
+        """float: allowable synchronization transmissions rate"""
+        return self._hbeat
+
 
