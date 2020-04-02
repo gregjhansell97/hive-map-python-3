@@ -1,82 +1,84 @@
-
-
-from hmap import Publisher, Subscriber, Router
-
-from hmap.transceivers import IPCTransceiver
-from hmap.handlers import StringTopicHandler, PyMsgHandler
-
-# idea of handlers:
-# they deal with making sure the data is packed correctly for where ever it
-# goes, it is the developers responsibility to make sure that messages have
-# appropriate handlers
-
-
-p = Publisher(message_handler=..., topic_handler=...)
-t = IPCTransceiver("ipc:///communication-channel")
-p.use(t)
-p.message_handler = PyMsgHandler()
-p.topic_handler = StringTopicHandler()
-
-# last 
-p.publish("weather.vt.killington", "yeet!")
-
-
-p.publish("weather.vt.rutland", "yeet!")
-
-
-
-
-
-from hmap.contexts import PyContext
-from hmap.transceivers import IPCTransceiver
-
-
-def on_killington_weather(msg): 
-    pass
-
-ctx = PyContext()
-trx = IPCTransceiver("ipc:///communication-channel")
-trx = InprocTransceiver()
-trx.context = ctx 
-trx.context = ctx
-
-trx.publish("weather.vt.killington", "yeet!")
-# returns subscriber object
-trx.subscribe("weather.vt.killington", on_killington_weather)
-
-r = Router(...)
-r.transceiver= trx
-
-# creates a router
-ctx.Router(heartbeat_rate=0.01, topic_preference=)
-
-
-
 from hmap.manet.interface import Publisher, Subscriber, Router
 
-from hmap.manet import Context # context for manet protocols
-from hmap.manet.protocols import flood # flooding protocol
+from hmap.routing.manet import Context # context for manet protocols
+from hmap.routing.manet.protocols import Flood # flooding protocol (provide Standard)
 from hmap.comm.transceivers import IPCTransceiver GlobTransceiver
+from hmap.matching.Topic
 
 # transceivers can have different tags to indicate level of comprehension
 # transceivers have: broadcast, deliver, transmit, on_receive
 
-ctx = Context(protocol=flood)
+ctx = Context(protocol=Flood, ontology=StringHierarchy, serializer=PySerializer)
+
+import hmap.manet as manet 
+# that way you can put caviats on various transceivers
+import hmap.manet.transceivers import IPCTransceiver 
+
+# key-word arguments imply topic style algorithm
+# raises value error
+ctx = manet.Context(
+        routing_protocol="manet.Flood", 
+        message_type="PyObj",
+        topic_type="StringHierarchy",
+        supported=["location", "velocity"] )
+
+# those are two ways of doing it
+ctx.Subscription
+ctx.Event
+
+
+
+
 # transceiver is context specific
-trx = IPCTransceiver("communication-channel") 
+#trx = IPCTransceiver("communication-channel") 
 
 # transceiver links up to first context that it sees
-pub = ctx.Publisher()
-pub.transceiver = trx # raises error if trx is connected to other context
-pub.publish(b"yeet", "weather.vt.killington")
+#pub = ctx.Publisher() # manet.Publisher
+#pub.transceiver = trx # raises error if trx is connected to other context
+#pub.publish("weather.vt.killington", (1, 2, 3, "message"))
 
-sub = ctx.Subscriber()
-sub.transceiver = trx
-sub.subscribe(on_killington_weather, "weather.vt.killington")
+#sub = ctx.Subscriber()
+#sub.transceiver = trx
+#def on_killington_weather(topic, message):
+#    pass
+#sub.subscribe("weather.vt.killington", on_killington_weather)
 
-# router could be doing background work... 
-router = ctx.Router()
-router.transceiver = trx
+# router could be doing background work... (all can be...)
+#router = ctx.Router()
+#router.transceiver = trx
 
 # different protocols may have varying levels of inter-language ability
+
+router = ctx.Router(heartbeat=0.0)
+router.transceiver = trx
+# router.receiver = trx
+# router.transmitter = trx
+
+router.subscribe("weather.vt.killington", on_killington_weather)
+router.publish("weather.vt.killington", (45, "*F"))
+
+
+
+from hmap.context import Context
+from hmap.matching import TopicBased
+from some_module import GossipRouter
+
+ctx = Context()
+
+# some algorithms may not need a context
+router = GossipRouter(
+        context=ctx,
+        matching_protocol=TopicBased("StringHierarchy", "PyObj"),
+        probability=0.5)
+
+router.publish("weather.vt.killington", (45, "*F"))
+router.subscribe("weather.vt.killington", on_killington_weather)
+
+
+
+
+
+
+
+
 
