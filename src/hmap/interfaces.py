@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Interfaces that can be implemented by a subclasses. Used throughout
+hive-map to verify the capability of an object
+"""
+
 import sched
 import time
 
 from abc import ABC, abstractmethod
 
-class TransceiverProperty(ABC):
+class TransceiverInterface(ABC):
     def __init__(self, trx=None):
         super().__init__()
         self.__trx = None
@@ -15,7 +19,7 @@ class TransceiverProperty(ABC):
     def transceiver(self):
         """Transceiver used to transmit and receive data"""
         return self.__trx
-    @self.transceiver.setter
+    @transceiver.setter
     def transceiver(self, trx):
         if not self.is_valid_transceiver(trx):
             raise ValueError("incompatable transceiver")
@@ -44,7 +48,7 @@ class TransceiverProperty(ABC):
 
 
 # TODO: initial heartbeat is 0.0, heartbeat is cancelled when set to 0.0
-class HeartbeatProperty(ABC):
+class HeartbeatInterface(ABC):
     def __init__(self,*, max_heartbeat_rate):
         super().__init__()
         if heartbeat_rate < 0.0:
@@ -81,7 +85,7 @@ class HeartbeatProperty(ABC):
         """Periodically invoked based on heartbeat parameter"""
         raise NotImplementedError 
 
-class ContextProperty(ABC):
+class ContextInterface(ABC):
     def __init__(self, context=None):
         super().__init__()
         if not self.is_valid_context(context):
@@ -93,3 +97,13 @@ class ContextProperty(ABC):
         return self.__context
     def is_valid_context(self, ctx):
         return True
+
+class SerializationInterface(ABC):
+    @staticmethod
+    @abstractmethod
+    def serialize(instance):
+        raise NotImplementedError
+    @staticmethod
+    @abstractmethod
+    def deserialize(instance, lazy=False):
+        raise NotImplementedError

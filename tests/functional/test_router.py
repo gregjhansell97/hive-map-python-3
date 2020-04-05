@@ -2,80 +2,52 @@
 # -*- coding: utf-8 -*-
 
 """
-Unit tests for Publisher
+Unit tests for Router base class
 """
 
 from collections import defaultdict
+import math
 import pytest
 
-from hmap import Publisher
+from hmap import matching
+
+# create some sort of matching algorithm...
+
+def get_router(Router):
+    return Router(matching=matching.TopicBased("FlatInt", "PyObject"))
+
+def get_callback():
+    def cb(self, topic, msg):
+        cb.log.add((topic, msg))
+    cb.log = set()
+
+def assert_equal(v1, v2, timeout=1, step=0.1):
+    while v1 != v2 and timeout > 0:
+        time.sleep(step)
+        timeout -= step
+    assert v1 == v2
 
 
-def test_initialization():
+def test_one_subscriber_one_publish(Router):
     """
-    Verify publisher can take in a topic and not crash
+    Ensures subscription works when a singular event is published
     """
-    p = Publisher(10)
+    r = get_router(Router)
+    s = r.subscribe(3, get_callback())
+    r.publish(3, "m1")
+    assert_equal(s.callback.log, {(3, "m1")})
 
+def test_one_subscriber_multiple_publishes(Router):
+    """
+    Ensures subscription works when multiple events of different topics are 
+    published
+    """
+    r = get_router(Router)
+    s = r.subscribe(3, get_callback())
+    expected_log = set()
+    for i in range(100):
+        if i%2 == 0:
+            r.publish(3, i)
+            expected_log.add((3, i))
+    assert_equal(s.callback.log, expected_log)
 
-def test_use_transceiver(Transceiver):
-    """
-    Verify publisher can use a transceiver object
-    """
-    # set up publisher
-    p = Publisher(10)
-    t = Transceiver()
-    p.use(t)
-
-
-def test_use_multiple_transceivers(Transceiver):
-    """
-    Verify publisher can use multiple transceivers
-    """
-    # set up publisher
-    p = Publisher(5)
-    ts = [Transceiver() for _ in range(10)]
-    for t in ts:
-        p.use(t)
-
-
-def test_publish_no_transceiver():
-    """
-    Verify publisher can publish even with no means of transceiver. May want to
-    consider raising an error if publish is called with no tranceiver...
-    """
-    p = Publisher(5)
-    p.publish(b"hello world")
-
-
-def test_publish_one_transceiver(Transceiver):
-    """
-    Verify publish works with when using one tranceiver
-    """
-    p = Publisher(5)
-    t = Transceiver()
-    p.use(t)
-    p.publish(b"hello world")
-
-
-def test_publish_many_transceivers(Transceiver):
-    """
-    Verify publish works with when using multiple tranceivers
-    """
-    p = Publisher(5)
-    ts = [Transceiver() for _ in range(10)]
-    for t in ts:
-        p.use(t)
-    p.publish(b"goodbye yellow brick road")
-
-
-def test_many_publish_many_transceivers(Transceiver):
-    """
-    Verify publish works many times with when using multiple tranceivers
-    """
-    p = Publisher(5)
-    ts = [Transceiver() for _ in range(10)]
-    for t in ts:
-        p.use(t)
-    for i in range(10):
-        p.publish(b"goodbye yellow brick road")

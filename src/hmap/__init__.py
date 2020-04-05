@@ -1,11 +1,3 @@
-from hmap.publisher import Publisher
-from hmap.subscriber import Subscriber
-from hmap.transceiver import Transceiver
-from hmap.router import Router
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-"""
-Example:
-    #TODO
-"""
-
-__all__ = ["Publisher", "Subscriber", "Transceiver", "Router"]

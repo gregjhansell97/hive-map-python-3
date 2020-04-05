@@ -8,16 +8,18 @@
     https://pytest.org/latest/plugins.html
 """
 
-from tests.local_transceiver import LocalTransceiver
-
+from hmap.routing import Router
+from hmap.matching.topic_based.topic_types import FlatInt
 
 def pytest_generate_tests(metafunc):
     """
     Customize test functions however needed
     """
-    '''
-    if "Transceiver" in metafunc.fixturenames:
-        # parameterized transceivers
-        metafunc.parametrize("Transceiver", [LocalTransceiver])
-    '''
-    pass
+    if "Router" in metafunc.fixturenames:
+        # parameterize Router class
+        routers = [Router]
+        metafunc.parametrize("Router", routers)
+    elif "FlatNumber" in metafunc.fixturenames:
+        # parameterize FlatNumber classes
+        topic_types = [FlatInt]
+        metafunc.parametrize("FlatNumber", topic_types)
