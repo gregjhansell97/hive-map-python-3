@@ -3,7 +3,7 @@
 
 from threading import Lock
 
-from hmap.matching import abc
+from hmap.matching.topic_based import abc
 
 
 def template(Topic):
@@ -14,24 +14,17 @@ def template(Topic):
         if Topic in template.subscription_templates:
             return template.subscription_templates[Topic]
 
-    class Subscription(abc.Subscription)
+    class Subscription(abc.TopicBasedSub):
         """TODO DESCRIPTION"""
-        def __init__(self, t, cb):
-            super().__init__()
-            self.__topic = Topic(t)
-            self.__callback = cb
-        def notify(self, event):
-            # subscription can't call None
-            if self.__callback is None:
-                return
-            self.__callback(event.topic, event.msg)
+        def __init__(self, targs, cb):
+            super().__init__(Topic(targs), cb)
         @staticmethod
         def serialize(subscription):
             return Topic.serialize(self.__topic)
         @staticmethod
-        def deserialize(raw_bytes):
-            self.__topic = Topic.deserialize(raw_bytes)
-            self.__callback = None
+        def deserialize(raw_bytes, lazy=False):
+            t = Topic.deserialize(raw_bytes)
+            return Subscription(t, None) # no callback 
     with template.lock:
         if Topic not in template.subscription_templates:
             template.subscription_templates[Topic] = Subscription

@@ -13,30 +13,11 @@ class Event(SerializationInterface):
     pass
 
 
-class Subscription(SerializationInterface):
+class Sub(SerializationInterface):
     """Base class for Subscription in the pub-sub system. The data that a
     subscription holds is considered to be immutable: breaking this assumption
     can cause issues with the get_matches of the Subscriptions class
     """
-
-    def __init__(self):
-        self.__owners = [] # owners of subscription class
-
-    @property
-    def owners(self):
-        """List of weak references of Subscriptions the own the Subscription"""
-        # weak references are used to avoid circular references
-        return self.__owners
-
-    def cancel(self):
-        """Invalidates subscription so that it no longer can be delivered"""
-        # remove from owners list
-        for r in self.__owners:
-            o = r()  # dereference weakref
-            if o is None:
-                continue
-            o.remove(self)  # remove oneself as a subscription
-
     @abstractmethod
     def notify(self, event):
         """Notifies a subscription about an event it would be interested in
@@ -47,26 +28,37 @@ class Subscription(SerializationInterface):
         raise NotImplementedError
 
 
-class Subscriptions(SerializationInterface):
+class SubCollection(SerializationInterface):
     """Base class for managing multiple subscriptions"""
 
+    @abstractmethod
+    def __iter__(self):
+        # for iterating over
+        raise NotImplementedError
+
+    @abstractmethod
+    def extend(self, sub_collection):
+        # addes the items of one sub_collection into another
+        raise NotImplementedError
+
+    @abstractmethod
     def add(self, subscription):
         """Adds subscription to the group of subscriptions
 
         Args:
-            subscription(Subscription): subscription being added to group of 
+            subscription(Sub): subscription being added to group of 
                 subscriptions
         """
-        subscription.owners.append(weakref.ref(self))
-        self.on_add(subscription)
+        raise NotImplementedError
 
+    @abstractmethod
     def remove(self, subscription):
         """Removes subscription from the group of subscriptions if it exists
         
         Args:
-            subscription(Subscription): subscription being removed
+            subscription(Sub): subscription being removed
         """
-        self.on_remove(subscription)
+        raise NotImplementedError
 
     @abstractmethod
     def matches(self, event):
@@ -80,17 +72,6 @@ class Subscriptions(SerializationInterface):
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def on_add(self, subscription):
-        """Invoked after add method is; same argument and return type as add"""
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_remove(self, subscription):
-        """Invoked after remove is, same argument and return type as remove"""
-        raise NotImplementedError
-
-
 class Algorithm(ABC):
     """Base class all matching algorithms follow"""
 
@@ -102,12 +83,12 @@ class Algorithm(ABC):
 
     @property
     @abstractmethod
-    def Subscriber(self):
+    def Sub(self):
         """Subscription implementation for the matching algorithm"""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def Subscribers(self):
+    def SubCollection(self):
         """Subscribers implementation for the matching algorithm"""
         raise NotImplementedError

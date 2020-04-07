@@ -17,14 +17,15 @@ def get_matching_algorithm(FlatNumber):
     return matching.TopicBased(FlatNumber, "PyObject")
 
 def get_callback():
-    def cb(self, topic, msg):
+    def cb(topic, msg):
         cb.log.add((topic, msg))
     cb.log = set()
+    return cb
 
 def test_subscription(FlatNumber):
     """Verifies subscription is notified properly"""
     A = get_matching_algorithm(FlatNumber)
-    S, E, Subscriptions= (A.Subscription, A.Event, A.Subscriptions)
+    S, E, SCollection= (A.Sub, A.Event, A.SubCollection)
     # test callback property
     cb = get_callback()
     s = S(2, cb)
@@ -33,16 +34,16 @@ def test_subscription(FlatNumber):
     for i in range(10):
         e = E(i, "msg")
         s.notify(e)
-        assert s.callback.log == {(e.topic, e.msg)}
+        assert s.callback.log == {(e.topic.expose(), e.msg.expose())}
         s.callback.log = set()
 
 def test_subscriptions(FlatNumber):
     """Verifies add and remove features of subscriptions"""
     A = get_matching_algorithm(FlatNumber)
-    S, E, Subscriptions = (A.Subscription, A.Event, A.Subscriptions)
+    S, E, SCollection = (A.Sub, A.Event, A.SubCollection)
 
     # Subscriptions instance
-    s_table = Subscriptions()
+    scollection = SCollection()
     # Separate datastructure to track Subscriptions
     subscriptions = defaultdict(lambda: [])
     # iterate through and create n subscriptions for each topic number n
@@ -50,13 +51,14 @@ def test_subscriptions(FlatNumber):
         for topic in range(i):
             s = S(topic, get_callback())
             subscriptions[topic].append(s)
-            s_table.add(s)
+            scollection.add(s)
     # notify all subscribers that match an event
     for topic in range(10):
-        e = Event(topic, "msg")
-        for s in s_table.match(e):
+        e = E(topic, "msg")
+        for s in scollection.matches(e):
             # go through all matching subscriptions and notify them
             s.notify(e)
+    # TODO check iter works appropriately
     # confirm only correct subscriptions were notified
     for topic in range(10):
         for s in subscriptions[topic]:

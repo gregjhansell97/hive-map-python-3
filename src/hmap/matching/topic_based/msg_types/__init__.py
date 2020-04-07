@@ -1,4 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#TODO: create module
+from hmap.matching.topic_based.msg_types.py_object import PyObject
+
+__all__ = ["PyObject"]

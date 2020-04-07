@@ -3,7 +3,7 @@
 
 from abc import abstractmethod
 
-from hmap.interface import SerializationInterface
+from hmap.interfaces import SerializationInterface
 
 
 class Topic(SerializationInterface):
@@ -18,4 +18,4 @@ class Topic(SerializationInterface):
 
     @abstractmethod
     def expose(self):
-
+        raise NotImplementedError
