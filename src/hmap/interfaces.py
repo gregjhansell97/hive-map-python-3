@@ -99,11 +99,14 @@ class ContextInterface(ABC):
         return True
 
 class SerializationInterface(ABC):
-    @staticmethod
     @abstractmethod
-    def serialize(instance):
+    def calcsize(self):
         raise NotImplementedError
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def deserialize(instance, lazy=False):
+    def serialize(cls, instance):
+        raise NotImplementedError
+    @classmethod
+    @abstractmethod
+    def deserialize(cls, raw_data, lazy=False):
         raise NotImplementedError

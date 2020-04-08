@@ -18,10 +18,10 @@ def template(Topic):
         """TODO DESCRIPTION"""
         def __init__(self, targs, cb):
             super().__init__(Topic(targs), cb)
-        @staticmethod
+        @classmethod
         def serialize(subscription):
             return Topic.serialize(self.__topic)
-        @staticmethod
+        @classmethod
         def deserialize(raw_bytes, lazy=False):
             t = Topic.deserialize(raw_bytes)
             return Subscription(t, None) # no callback 

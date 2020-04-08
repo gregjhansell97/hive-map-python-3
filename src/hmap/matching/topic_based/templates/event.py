@@ -17,16 +17,16 @@ def template(Topic, Msg):
         """Event for all topic-based algorithms"""
         def __init__(self, targs, margs):
             super().__init__(Topic(targs), Msg(margs))
-        @staticmethod
-        def serialize(event):
+        @classmethod
+        def serialize(cls, event):
             #TODO
             msg_serial = Msg.serialize(self.__msg)
             topic_serial = Topic.serialize(self.__topic)
             max_size = Topic.max_size #TODO
             # tack on size of topic to front
             return max_size + topic_serial + msg_serial
-        @staticmethod
-        def deserialize(raw_bytes, lazy=False):
+        @classmethod
+        def deserialize(cls, raw_bytes, lazy=False):
             # TODO
             topic_size = raw_bytes[:Topic.max_size] #TODO
             raw_bytes = raw_bytes[Topic.max_size:] #TODO 

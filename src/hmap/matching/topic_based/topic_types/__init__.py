@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""""""
-#TODO explanation
+"""TODO: EXPLANATION"""
 
-from hmap.matching.topic_based.topic_types.flat_int import FlatInt
+from hmap.matching.topic_based.topic_types.flat_numbers import (
+        FlatByte,
+        FlatUByte,
+        FlatInt,
+        FlatUInt)
 
-__all__ = ["FlatInt"]
+__all__ = ["FlatByte", "FlatUByte", "FlatInt", "FlatUInt"]

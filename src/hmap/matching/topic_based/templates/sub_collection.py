@@ -12,12 +12,12 @@ def template(Topic):
             return template.templates[Topic]
     # TODO will only work for flat structures
     class SC(abc.TopicBasedSubCollection):
-        @staticmethod
+        @classmethod
         def serialize(subscription):
             # TODO
             #return Topic.serialize(self.__topic)
             return b''
-        @staticmethod
+        @classmethod
         def deserialize(raw_bytes):
             # TODO
             return SC()
