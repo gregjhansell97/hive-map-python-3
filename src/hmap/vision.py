@@ -1,3 +1,4 @@
+import hmap
 from hmap import Router
 from hmap.matching import TopicBased
 from some_module import GossipRouter
@@ -24,16 +25,19 @@ class MyContext(
 ctx = MyContext(loc=(1, 2))
 
 # some algorithms may not need a context
-router = HintRouter(
+hint_router = HintRouter(
         context=MyContext
         matching=TopicBased("FlatInteger", "Bytes")a)
-router = GossipRouter(
+gossip_router = GossipRouter(
         context=ctx,
         matching=TopicBased("StringHierarchy", "PyObj"),
         probability=0.5)
 
-router.publish("weather.vt.killington", (45, "*F"))
-router.subscribe("weather.vt.killington", on_killington_weather)
+# create an entry-point into the network (supply routers too)
+hnet = hmap.Network([hint_router, gossip_router])
+
+hnet.publish("weather.vt.killington", (45, "*F"))
+hnet.subscribe("weather.vt.killington", on_killington_weather)
 
 
 
