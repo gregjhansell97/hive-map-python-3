@@ -11,6 +11,7 @@ import pytest
 
 from hmap.matching.topic_based.msg_types import PyObj
 
+
 def test_py_obj_methods():
     """Verifies all methods function as expected"""
     obj1 = (1, 2, "does this work", {"As": 1})
@@ -23,7 +24,6 @@ def test_py_obj_methods():
     assert m1.expose() == obj1 == m1_copy.expose()
     assert m1 != m2
     assert m1.expose() != m2.expose()
-    
 
 
 def test_serialization():
@@ -43,4 +43,3 @@ def test_serialization():
         ms = PyObj.deserialize(PyObj.serialize(ms))
     assert ms != m1
     assert ms.expose() == m1.expose() == obj1
-

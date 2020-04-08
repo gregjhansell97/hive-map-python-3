@@ -4,4 +4,3 @@
 from hmap.matching.topic_based.templates.algorithm import template
 
 __all__ = ["template"]
-

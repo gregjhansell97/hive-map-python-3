@@ -18,6 +18,7 @@ class Sub(SerializationInterface):
     subscription holds is considered to be immutable: breaking this assumption
     can cause issues with the get_matches of the Subscriptions class
     """
+
     @abstractmethod
     def notify(self, event):
         """Notifies a subscription about an event it would be interested in
@@ -71,6 +72,7 @@ class SubCollection(SerializationInterface):
             (object): iterable object of subscriptions event matches
         """
         raise NotImplementedError
+
 
 class Algorithm(ABC):
     """Base class all matching algorithms follow"""

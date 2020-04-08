@@ -4,9 +4,10 @@
 """TODO: EXPLANATION"""
 
 from hmap.matching.topic_based.topic_types.flat_numbers import (
-        FlatByte,
-        FlatUByte,
-        FlatInt,
-        FlatUInt)
+    FlatByte,
+    FlatUByte,
+    FlatInt,
+    FlatUInt,
+)
 
 __all__ = ["FlatByte", "FlatUByte", "FlatInt", "FlatUInt"]

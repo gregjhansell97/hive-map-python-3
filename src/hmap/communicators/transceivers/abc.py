@@ -11,9 +11,10 @@ class Transceiver(ABC):
     """Abstract base class for all transceivers. Transceivers are event-driven;
     callbacks are invoked upon receiving a transmission
     """
+
     def __init__(self):
         # raw data delivered to callback with transceiver delivering it
-        self.__callbacks = [] # callback(trx, data)
+        self.__callbacks = []  # callback(trx, data)
 
     @abstractmethod
     def transmit(self, data):
@@ -53,4 +54,5 @@ class Transceiver(ABC):
         """
         self.__callbacks.remove(callback)
 
-#TODO write a base class for packing a message
+
+# TODO write a base class for packing a message

@@ -2,31 +2,43 @@
 # -*- coding: utf-8 -*-
 
 """
-Unit tests for FlatInt matching.TopicBased algorithm
 """
 
 from collections import defaultdict
 import math
 import pytest
 
-from hmap import matching
+from tests.matching.topic_based.fixtures import MatchingAlgorithm
 
-# create some sort of matching algorithm...
 
-def get_matching_algorithm():
-    return matching.TopicBased(FlatNumber, "PyObject")
-
-def get_callback():
-    def cb(topic, msg):
-        cb.log.add((topic, msg))
-    cb.log = set()
-    return cb
-
-def test_sub():
+def test_event(MatchingAlgorithm):
     """Verifies subscription is notified properly"""
-    A = matching.TopicBased("FlatInt", "PyObject")
-    Sub, Event, SubCollection= (A.Sub, A.Event, A.SubCollection)
+    Sub, Event, SubCollection = MatchingAlgorithm
 
+    # initialization, topic=1 msg="simple msg"
+    e = Event(1, "simple msg")
+    assert e.topic.expose() == 1
+    assert e.msg.expose() is "simple msg"
+
+    # initialize with beefier object
+    obj = {}
+    for i in range(10):
+        obj[i] = f"{hash(i)}"
+    e = Event(1, obj)
+    assert e.topic.expose() == 1
+    assert e.msg.expose() is obj
+
+
+def test_event_serialization(MatchingAlgorithm):
+    Sub, Event, SubCollection = MatchingAlgorithm
+
+    e = Event(1, "simple msg")
+
+    # TODO we also need to make sure that the same topic-based classes are
+    # imported
+
+
+'''
 def test_subscriptions(FlatNumber):
     """Verifies add and remove features of subscriptions"""
     A = get_matching_algorithm(FlatNumber)
@@ -72,3 +84,4 @@ def test_subscriptions(FlatNumber):
 
     # can be in a set
     subscriptions = set([s])
+'''

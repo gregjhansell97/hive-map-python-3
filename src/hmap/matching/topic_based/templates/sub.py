@@ -6,30 +6,25 @@ from threading import Lock
 from hmap.matching.topic_based import abc
 
 
-def template(Topic):
+# T for Topic NOTE do not rename it to Topic
+def template(T):
     """Many Topic combinations cannot write them all out, template function 
     creates subscription classes of a certain Topic 
     """
     with template.lock:
-        if Topic in template.subscription_templates:
-            return template.subscription_templates[Topic]
+        if T in template.sub_templates:
+            return template.sub_templates[T]
 
-    class Subscription(abc.TopicBasedSub):
+    class S(abc.TopicBasedSub):
         """TODO DESCRIPTION"""
-        def __init__(self, targs, cb):
-            super().__init__(Topic(targs), cb)
-        @classmethod
-        def serialize(subscription):
-            return Topic.serialize(self.__topic)
-        @classmethod
-        def deserialize(raw_bytes, lazy=False):
-            t = Topic.deserialize(raw_bytes)
-            return Subscription(t, None) # no callback 
+
+        Topic = T
+
     with template.lock:
-        if Topic not in template.subscription_templates:
-            template.subscription_templates[Topic] = Subscription
-    return template.subscription_templates[Topic]
+        if T not in template.sub_templates:
+            template.sub_templates[T] = S
+    return template.sub_templates[T]
 
-template.subscription_templates = {}
+
+template.sub_templates = {}
 template.lock = Lock()
-

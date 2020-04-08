@@ -2,29 +2,21 @@
 # -*- coding: utf-8 -*-
 
 """
-Unit tests for FlatInt matching.TopicBased algorithm
 """
 
 from collections import defaultdict
 import math
 import pytest
 
-from hmap import matching
-
-# create some sort of matching algorithm...
-def get_callback():
-    def cb(topic, msg):
-        cb.log.add((topic, msg))
-    cb.log = set()
-    return cb
 
 def test_type_errors(FlatNumber):
     """Confirms exceptions are raised when constructor is misused"""
     with pytest.raises(Exception):
-        n1 = FlatNumber("hello world") 
+        n1 = FlatNumber("hello world")
     with pytest.raises(Exception):
         # rediculously high number
-        n1 = FlatNumber(2**(8*32))
+        n1 = FlatNumber(2 ** (8 * 32))
+
 
 def test_flat_number_methods(FlatNumber):
     """verifies all methods function as expected"""
@@ -43,6 +35,7 @@ def test_flat_number_methods(FlatNumber):
     assert n1.expose() == 10
     assert n3.expose() == 3
 
+
 def test_serialization(FlatNumber):
     n1 = FlatNumber(3)
     n2 = FlatNumber.deserialize(FlatNumber.serialize(n1))
@@ -57,7 +50,7 @@ def test_serialization(FlatNumber):
     assert n1 == n3
     assert hash(n1) == hash(n3)
     assert n1.expose() == n3.expose() == 3
-    
+
     # take through the wringer
     n3 = FlatNumber.deserialize(FlatNumber.serialize(n1) + b"123A")
     for i in range(20):
@@ -68,4 +61,3 @@ def test_serialization(FlatNumber):
     assert n1 == n3
     assert hash(n1) == hash(n3)
     assert n1.expose() == n3.expose() == 3
-

@@ -6,6 +6,7 @@ from threading import Lock
 
 from hmap.matching.topic_based import abc
 
+
 def template(Topic):
     with template.lock:
         if Topic in template.templates:
@@ -15,12 +16,14 @@ def template(Topic):
         @classmethod
         def serialize(subscription):
             # TODO
-            #return Topic.serialize(self.__topic)
-            return b''
+            # return Topic.serialize(self.__topic)
+            return b""
+
         @classmethod
         def deserialize(raw_bytes):
             # TODO
             return SC()
+
     with template.lock:
         if Topic not in template.templates:
             template.templates[Topic] = SC
