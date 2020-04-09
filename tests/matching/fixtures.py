@@ -7,6 +7,7 @@ import pytest
 
 class EventFixture(ABC):
     events = None # event instances of class
+    equal = None
 
 class SubFixture(ABC):
     Sub = None

@@ -15,12 +15,6 @@ class FlatNumber(HashableTopic):
         self.__raw = struct.pack(self.fmt, content)
         self.__content = content
 
-    def __hash__(self):
-        return hash(self.__content)
-
-    def __eq__(self, other):
-        return self.__content == other.__content
-
     @property
     def content(self):
         return self.__content

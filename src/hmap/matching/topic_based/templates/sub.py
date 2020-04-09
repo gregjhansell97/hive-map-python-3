@@ -16,12 +16,12 @@ def template(T):
         if T in template.sub_templates:
             return template.sub_templates[T]
 
-    if subsclass(HashableTopic, T):
-        class S(abc.HashableTopicBasedSub):
+    if issubclass(T, HashableTopic):
+        class S(HashableTopicBasedSub):
             """TODO DESCRIPTION"""
             Topic = T
             # inner class needs reference too
-            class Collection(abc.HashableTopicBasedSub.Collection):
+            class Collection(HashableTopicBasedSub.Collection):
                 Topic = T
     else:
         raise TypeError(f"{T}'s default impl is not supported")

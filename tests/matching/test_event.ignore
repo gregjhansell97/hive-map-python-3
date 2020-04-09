@@ -24,11 +24,11 @@ def test_event_interfaces(EventFixture):
         # go through remaining
         i = 0
         while i in range(len(events)):
-            if event == events[i]: # found a match
+            if EventFixture.equal(event, events[i]): # found a match
                 matches[-1] += (events.pop(i),)
                 continue
             i += 1
-
+    print(matches)
     # verify interfaces are happy with event
     serialize_interface.assert_consistency(matches) # ISerialize
 

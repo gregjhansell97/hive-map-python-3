@@ -7,7 +7,7 @@ from hmap.interfaces import ISerialize, IHash
 
 class Topic(ISerialize):
     def __repr__(self):
-        return f"{type(self)}({self.content})"
+        return f"{type(self).__name__}({self.content})"
 
     @property
     @abstractmethod
@@ -15,4 +15,8 @@ class Topic(ISerialize):
         raise NotImplementedError
 
 class HashableTopic(Topic, IHash):
-    pass
+    def __hash__(self):
+        return hash(self.content)
+    def __eq__(self, other):
+        return self.content == other.content
+

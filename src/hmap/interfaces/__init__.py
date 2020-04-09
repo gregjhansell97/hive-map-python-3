@@ -10,6 +10,9 @@ from hmap.interfaces.heartbeat_interface import IHeartbeat
 from hmap.interfaces.context_interface import IContext
 from hmap.interfaces.serialize_interface import ISerialize
 from hmap.interfaces.hash_interface import IHash
+from hmap.interfaces.equality_interface import IEquality
 
-__all__ = ["ITransceiver", "IHeartbeat", "IContext", "ISerializer", "IHash"]
+__all__ = [
+        "ITransceiver", "IHeartbeat", "IContext", "ISerializer", "IHash", 
+        "IEquality"]
 

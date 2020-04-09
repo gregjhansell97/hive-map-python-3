@@ -21,8 +21,8 @@ class TopicBasedEvent(abc.Event):
         self.__msg = msg
         if self.__msg is None:
             self.__msg = self.Msg(mcontent)
-    def __eq__(self, other):
-        return self.__msg == other.__msg and self.__topic == other.__topic
+    def __repr__(self):
+        return f"({self.topic}, {self.msg})"
 
     def calcsize(self):
         return self.topic.calcsize() + self.msg.calcsize()

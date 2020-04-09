@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pytest
+from abc import ABC, abstractmethod
 
-
-@pytest.fixture
-def Callback():
-    def cb(topic, msg):
-        cb.log.add((topic, msg))
-
-    cb.log = set()
-    return cb
+class FABC(ABC):
+    types = []
+    @classmethod
+    @abstractmethod
+    def instances(cls):
+        """List of instances of a specific type"""
+        raise NotImplementedError

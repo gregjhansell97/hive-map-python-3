@@ -7,10 +7,7 @@ hive-map to verify the capability of an object
 
 from abc import ABC, abstractmethod
 
-from hmap.interfaces.equality_interface import (
-        IEquality, assert_equality, assert_inequality)
-
-class ISerialize(IEquality):
+class ISerialize(ABC):
     @abstractmethod
     def calcsize(self):
         raise NotImplementedError
@@ -24,33 +21,31 @@ class ISerialize(IEquality):
     def deserialize(cls, raw_data, lazy=False):
         raise NotImplementedError
 
-def assert_consistency(matches):
+def assert_consistency(matches, equal=lambda a, b: a == b):
     """
     List of tuples where each tuple is a group that satisifies equality
     """
     layers = 5
     for instances in matches:
-        assert_equality(instances)
         for i1 in instances:
             Cls = type(i1)
             for i2 in instances:
                 # standard
-                assert Cls.deserialize(Cls.serialize(i1)) == i2
+                assert equal(Cls.deserialize(Cls.serialize(i1)), i2)
                 # layered
                 raw_i1 = Cls.serialize(i1)
                 expectedsize = len(raw_i1)
-                assert i1.calcsize() == expectedsize
+                assert equal(i1.calcsize(), expectedsize)
                 # add extra bytes on end of bytestream
                 for _ in range(layers):
                     raw_i1 += Cls.serialize(i1)
                 i1 = Cls.deserialize(raw_i1)
                 assert len(raw_i1) > expectedsize # sanity check
                 assert i1.calcsize() == expectedsize
-                assert Cls.deserialize(raw_i1) == i2
+                assert equal(Cls.deserialize(raw_i1), i2)
                 assert len(Cls.serialize(i1)) == expectedsize
     # check inequalities too
     instances = [i[0] for i in matches]
-    assert_inequality(instances)
     for i1 in instances:
         Cls = type(i1)
         ref_count = 0
@@ -60,7 +55,7 @@ def assert_consistency(matches):
                 ref_count += 1
                 continue
             assert type(i1) is type(i2), "types must be consistent"
-            assert Cls.deserialize(Cls.serialize(i1)) != i2
+            assert not equal(Cls.deserialize(Cls.serialize(i1)), i2)
 
 
 

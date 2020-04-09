@@ -25,7 +25,8 @@ def test_hashable_topic_interfaces(MsgFixture):
     contents = MsgFixture.contents
     matches = [(Msg(c), Msg(c)) for c in contents]
     # verify interfaces are happy with topic
-    serialize_interface.assert_consistency(matches) # ISerialize
+    # ISerialize
+    serialize_interface.assert_consistency(matches, equal=MsgFixture.equal)
 
 def test_hashable_topic_content(MsgFixture):
     for c in MsgFixture.contents:
