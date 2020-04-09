@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from hmap.matching.topic_based.abc.event import TopicBasedEvent
-from hmap.matching.topic_based.abc.msg import Msg
-from hmap.matching.topic_based.abc.sub import TopicBasedSub
-from hmap.matching.topic_based.abc.sub_collection import (
-    TopicBasedSubCollection,
-)
-from hmap.matching.topic_based.abc.topic import Topic
+from hmap.matching.topic_based.abc.events import TopicBasedEvent
+from hmap.matching.topic_based.abc.msgs import Msg
+from hmap.matching.topic_based.abc.subs import (
+        TopicBasedSub, HashableTopicBasedSub)
+from hmap.matching.topic_based.abc.topics import Topic, HashableTopic
 
 __all__ = [
-    "TopicBasedEvent",
+    "HashableTopic",
+    "HashableTopicBasedSub",
     "Msg",
-    "TopicBasedSub",
-    "TopicBasedSubCollection",
     "Topic",
+    "TopicBasedEvent",
+    "TopicBasedSub",
 ]

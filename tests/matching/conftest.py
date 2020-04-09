@@ -8,20 +8,30 @@
     https://pytest.org/latest/plugins.html
 """
 
-from hmap.routing import Router
-from hmap.matching.topic_based.topic_types import (
-    FlatInt,
-    FlatByte,
-    FlatUInt,
-    FlatUByte,
-)
+import tests.matching.fixtures as matching_fixtures
+import tests.matching.topic_based.fixtures as topic_based_matching_fixtures
+
+# collect impl_fixtures
+impl_fixtures = matching_fixtures.impl_fixtures
+impl_fixtures |= topic_based_matching_fixtures.impl_fixtures
+
+# collect base_fixtures
+base_fixtures = matching_fixtures.base_fixtures
+base_fixtures |= topic_based_matching_fixtures.base_fixtures
 
 
 def pytest_generate_tests(metafunc):
     """
     Customize test functions however needed
     """
-    if "FlatNumber" in metafunc.fixturenames:
-        # parameterize FlatNumber classes
-        topic_types = [FlatInt, FlatByte, FlatUInt, FlatUByte]
-        metafunc.parametrize("FlatNumber", topic_types)
+    for ImplF in impl_fixtures:
+        if ImplF.__name__ in metafunc.fixturenames:
+            metafunc.parametrize(ImplF.__name__, [ImplF])
+    for BaseF in base_fixtures:
+        if BaseF.__name__ in metafunc.fixturenames:
+            # extract fixtures that are subclasses of BaseF (abstract fixture)
+            fixtures = [
+                    F
+                    for F in impl_fixtures
+                    if F not in base_fixtures and issubclass(F, BaseF)]
+            metafunc.parametrize(BaseF.__name__, fixtures)

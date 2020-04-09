@@ -12,15 +12,17 @@ class TopicBasedEvent(abc.Event):
     Topic = None
     Msg = None
 
-    def __init__(self, targs, margs, topic=None, msg=None):
+    def __init__(self, tcontent, mcontent, topic=None, msg=None):
         super().__init__()
         self.__topic = topic
         if self.__topic is None:
-            self.__topic = self.Topic(targs)
+            self.__topic = self.Topic(tcontent)
 
         self.__msg = msg
         if self.__msg is None:
-            self.__msg = self.Msg(margs)
+            self.__msg = self.Msg(mcontent)
+    def __eq__(self, other):
+        return self.__msg == other.__msg and self.__topic == other.__topic
 
     def calcsize(self):
         return self.topic.calcsize() + self.msg.calcsize()
@@ -43,7 +45,7 @@ class TopicBasedEvent(abc.Event):
     def deserialize(cls, raw_bytes, lazy=False):
         t = cls.Topic.deserialize(raw_bytes, lazy)
         offset = t.calcsize()
-        m = cls.Msg.deserialize(raw_bytes[:offset], lazy)
+        m = cls.Msg.deserialize(raw_bytes[offset:], lazy)
         return cls(None, None, topic=t, msg=m)
 
         raise NotImplementedError

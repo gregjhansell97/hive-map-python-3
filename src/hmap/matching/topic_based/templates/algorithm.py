@@ -6,7 +6,6 @@ from threading import Lock
 from hmap.matching import abc
 import hmap.matching.topic_based.templates.event as event
 import hmap.matching.topic_based.templates.sub as sub
-import hmap.matching.topic_based.templates.sub_collection as scollection
 import hmap.matching.topic_based.topic_types as topic_types
 import hmap.matching.topic_based.msg_types as msg_types
 
@@ -36,14 +35,9 @@ def template(Topic, Msg):
         @property
         def Event(self):
             return event.template(Topic, Msg)
-
         @property
         def Sub(self):
             return sub.template(Topic)
-
-        @property
-        def SubCollection(self):
-            return scollection.template(Topic)
 
     with template.lock:
         if (Topic, Msg) not in template.algorithm_templates:

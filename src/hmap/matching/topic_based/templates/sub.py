@@ -3,7 +3,8 @@
 
 from threading import Lock
 
-from hmap.matching.topic_based import abc
+from hmap.matching.topic_based.abc.subs import HashableTopicBasedSub
+from hmap.matching.topic_based.abc.topics import HashableTopic
 
 
 # T for Topic NOTE do not rename it to Topic
@@ -15,10 +16,15 @@ def template(T):
         if T in template.sub_templates:
             return template.sub_templates[T]
 
-    class S(abc.TopicBasedSub):
-        """TODO DESCRIPTION"""
-
-        Topic = T
+    if subsclass(HashableTopic, T):
+        class S(abc.HashableTopicBasedSub):
+            """TODO DESCRIPTION"""
+            Topic = T
+            # inner class needs reference too
+            class Collection(abc.HashableTopicBasedSub.Collection):
+                Topic = T
+    else:
+        raise TypeError(f"{T}'s default impl is not supported")
 
     with template.lock:
         if T not in template.sub_templates:

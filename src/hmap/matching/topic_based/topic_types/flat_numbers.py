@@ -4,25 +4,26 @@
 from abc import abstractmethod
 import struct
 
-from hmap.matching.topic_based.abc.topic import Topic
+from hmap.matching.topic_based.abc.topics import HashableTopic
 
 
-class FlatNumber(Topic):
+class FlatNumber(HashableTopic):
     fmt = ""
 
-    def __init__(self, topic):
+    def __init__(self, content):
         # TODO move to super class (FlatNumber)
-        self.__raw = struct.pack(self.fmt, topic)
-        self.__topic = topic
+        self.__raw = struct.pack(self.fmt, content)
+        self.__content = content
 
     def __hash__(self):
-        return hash(self.__topic)
+        return hash(self.__content)
 
     def __eq__(self, other):
-        return self.__topic == other
+        return self.__content == other.__content
 
-    def expose(self):
-        return self.__topic
+    @property
+    def content(self):
+        return self.__content
 
     def calcsize(self):
         return struct.calcsize(self.fmt)
@@ -51,3 +52,6 @@ class FlatInt(FlatNumber):
 
 class FlatUInt(FlatNumber):
     fmt = "I"
+
+# hide parent class
+__all__ = ["FlatByte", "FlatUByte", "FlatInt", "FlatUInt"]

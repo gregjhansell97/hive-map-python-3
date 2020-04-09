@@ -3,7 +3,7 @@
 
 from threading import Lock
 
-from hmap.matching.topic_based import abc
+from hmap.matching.topic_based.abc import events
 
 
 def template(T, M):
@@ -14,12 +14,12 @@ def template(T, M):
         if (T, M) in template.event_templates:
             return template.event_templates[(T, M)]
 
-    class E(abc.TopicBasedEvent):
+    class E(events.TopicBasedEvent):
         """Event for all topic-based algorithms"""
-
         Topic = T
         Msg = M
 
+    # make sure instance didn't get created while making E
     with template.lock:
         if (T, M) not in template.event_templates:
             template.event_templates[(T, M)] = E
