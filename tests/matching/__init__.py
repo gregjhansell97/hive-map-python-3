@@ -2,16 +2,10 @@
 # -*- coding: utf-8 -*-
 
 #from tests.matching.fixtures import ...
-import tests.matching.topic_based as topic_based 
+from tests.matching.fixtures import base_fixtures, impl_fixtures
+import tests.matching.topic_based as topic_based
 
-base_fixtures = []
-base_fixtures += topic_based.base_fixtures 
-
-impl_fixtures = []
-impl_fixtures += topic_based.impl_fixtures
-
-# sanity check 
-fixtures = impl_fixtures + base_fixtures
-assert(len(fixtures) == len(set(fixtures)))
+base_fixtures |= topic_based.base_fixtures
+impl_fixtures |= topic_based.impl_fixtures
 
 __all__ = ["base_fixtures", "impl_fixtures"]

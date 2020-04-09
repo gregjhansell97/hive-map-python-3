@@ -5,17 +5,19 @@ from abc import ABC, abstractmethod
 
 import pytest
 
-class EventFixture(ABC):
-    events = None # event instances of class
-    equal = None
+from hmap.matching.abc import Event, Sub, Algorithm
+from tests.interfaces.fixtures import FISerialize
+from tests.fixtures import FABC
 
-class SubFixture(ABC):
-    Sub = None
-    Event = None
-    events = None # list of events
-    subs = None # list of subscriptions
-    expected_interest = None #hashmap of event and a list of subscriptions interested
+class FMatchingComponent(FISerialize):
+    InstanceType = object
 
-base_fixtures = {EventFixture, SubFixture}
+class FEvent(FMatchingComponent):
+    InstanceType = Event
+
+class FSub(FMatchingComponent):
+    InstanceType = Sub
+
+base_fixtures = {FMatchingComponent, FEvent, FSub}
 impl_fixtures = set()
 

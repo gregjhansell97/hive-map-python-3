@@ -8,30 +8,15 @@
     https://pytest.org/latest/plugins.html
 """
 
-from tests.fixtures import FABC
+from tests.fixtures import base_fixtures, impl_fixtures, FABC
 import tests.matching as matching
 import tests.interfaces as interfaces
 
-print("#"*50)
-print(matching.base_fixtures)
-print(matching.impl_fixtures)
-print("#"*50)
+base_fixtures |= matching.base_fixtures
+base_fixtures |= interfaces.base_fixtures
 
-# base fixtures
-base_fixtures = [FABC]
-base_fixtures += matching.base_fixtures 
-base_fixtures += interfaces.base_fixtures
-
-# impl fixtures
-impl_fixtures = []
-impl_fixtures += matching.impl_fixtures 
-impl_fixtures += interfaces.impl_fixtures
-
-# globbed fixtures (for sanity check)
-fixtures = base_fixtures + impl_fixtures
-assert all((issubclass(F, FABC) for F in fixtures)), "all fixtures subclass of FABC"
-assert len(set(fixtures)) == len(fixtures), "no duplicates"
-assert len(set(fixtures)) == len(fixtures), "no duplicates"
+impl_fixtures |= matching.impl_fixtures 
+impl_fixtures |= interfaces.impl_fixtures
 
 def pytest_generate_tests(metafunc):
     """

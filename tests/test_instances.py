@@ -3,19 +3,15 @@
 
 import pytest
 
-def test_types(FABC):
+def test_type(FABC):
     instances = FABC.instances()
-    types = set()
+    superclasses = set()
     for F in FABC.mro():
         try:
-            if F.types is not None:
-                types.update(set(F.types))
+            superclasses.add(F.InstanceType)
         except AttributeError:
             pass
-    print("#"*50)
-    print(types)
-    print("#"*50)
     for i in instances:
-        for T in types:
+        for T in superclasses:
             assert issubclass(type(i), T)
 

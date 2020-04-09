@@ -9,7 +9,7 @@ class FInterface(FABC):
     pass
 
 class FIEquality(FInterface):
-    types = [IEquality]
+    InstanceType = IEquality
     @classmethod
     @abstractmethod
     def matches(cls):
@@ -23,13 +23,15 @@ class FIEquality(FInterface):
         raise NotImplementedError
 
 class FIHash(FIEquality):
-    types = [IHash]
+    InstanceType = IHash
 
 class FISerialize(FInterface):
-    types = [ISerialize]
+    InstanceType = ISerialize
     @classmethod
     @abstractmethod
     def equal(cls, i1, i2):
         """compare to instances for serialization equality"""
         raise NotImplementedError
 
+base_fixtures = {FInterface, FIEquality, FIHash, FISerialize}
+impl_fixtures = set()

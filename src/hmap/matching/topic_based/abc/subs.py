@@ -24,12 +24,11 @@ class TopicBasedSub(abc.Sub):
         return self.__topic.calcsize()
     @classmethod
     def serialize(cls, subscription):
-        return cls.Topic.serialize(self.__topic)
+        return cls.Topic.serialize(subscription.__topic)
     @classmethod
     def deserialize(cls, raw_bytes, lazy=False):
         t = cls.Topic.deserialize(raw_bytes)
-        s = cls(None, None, topic=t)
-        return t  # no callback
+        return cls(None, None, topic=t)  # no callback
     def notify(self, event):
         # subscription can't call None
         if self.__callback is None:

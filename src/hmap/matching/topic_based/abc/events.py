@@ -47,5 +47,3 @@ class TopicBasedEvent(abc.Event):
         offset = t.calcsize()
         m = cls.Msg.deserialize(raw_bytes[offset:], lazy)
         return cls(None, None, topic=t, msg=m)
-
-        raise NotImplementedError
