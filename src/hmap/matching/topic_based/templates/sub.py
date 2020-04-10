@@ -23,6 +23,7 @@ def template(T):
             # inner class needs reference too
             class Collection(HashableTopicBasedSub.Collection):
                 Topic = T
+        S.Collection.Sub = S
     else:
         raise TypeError(f"{T}'s default impl is not supported")
 
