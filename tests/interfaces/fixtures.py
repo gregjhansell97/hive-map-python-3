@@ -12,13 +12,13 @@ class FIEquality(FInterface):
     InstanceType = IEquality
     @classmethod
     @abstractmethod
-    def matches(cls):
+    def matches(cls, num):
         """list of instances that are all equal"""
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def mismatches(cls):
+    def mismatches(cls, num):
         """list of instances that are not equal"""
         raise NotImplementedError
 

@@ -17,6 +17,11 @@ class Sub(ISerialize):
     """Base class for Subscription in the pub-sub system. The data that a
     subscription holds is considered to be immutable: breaking this assumption
     can cause issues with the get_matches of the Subscriptions class
+
+    ALSO it seems impractical to have subs themselves be serializable, like
+    when exactly are you transmitting subscritions... never! because you would
+    lose the callback in the process which is the important part of a
+    subscription.
     """
 
     @abstractmethod
@@ -30,6 +35,10 @@ class Sub(ISerialize):
 
     class Collection(ISerialize):
         """Base class for managing multiple subscriptions"""
+        # NOTE serialization does not necessarily mean component wise agreement
+        # the serialization process could simply depict what the colleciton
+        # embodies (like the currently interested topics...
+        # subscribe option to it ... almost like a subscription...
 
         @abstractmethod
         def __iter__(self):

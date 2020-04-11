@@ -23,7 +23,7 @@ class Transceiver(ABC):
         Args:
             data(bytes): data to transmit on network
         """
-        pass
+        raise NotImplementedError
 
     def receive(self, data):
         """Receives data from another transceiver
@@ -42,6 +42,7 @@ class Transceiver(ABC):
         Args:
             callback: a callback to be invoked on new data reception
         """
+        #TODO make thread safe
         if callback in self.__callbacks:
             return
         self.__callbacks.append(callback)

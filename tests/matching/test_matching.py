@@ -13,7 +13,7 @@ from hmap.interfaces import serialize_interface
 
 
 def test_matching_component_uniqueness(FMatchingComponent):
-    instances = FMatchingComponent.instances()
+    instances = FMatchingComponent.instances(5)
     serialize = FMatchingComponent.InstanceType.serialize
     deserialize = FMatchingComponent.InstanceType.deserialize
     equal = FMatchingComponent.equal
@@ -23,9 +23,10 @@ def test_matching_component_uniqueness(FMatchingComponent):
 
 def test_basic_sub_collection(FSub):
     Sub = FSub.InstanceType
-    subs = FSub.instances()
-    subs_count = len(subs)
-    assert subs_count > 6, "insufficient number of instances"
+    subs_count = 10 
+    subs = FSub.instances(subs_count)
+    assert subs_count == len(subs)
+
     assert len(set(subs)) == subs_count, "subs must be unique"
     subs1 = subs[:subs_count//2]
     subs2 = subs[subs_count//2:]

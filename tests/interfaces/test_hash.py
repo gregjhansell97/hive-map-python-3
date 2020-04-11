@@ -4,14 +4,14 @@
 import pytest
 
 def test_set_add(FIHash):
-    matches = FIHash.matches()
-    mismatches = FIHash.mismatches()
+    matches = FIHash.matches(10)
+    mismatches = FIHash.mismatches(10)
     assert len(set(matches)) == 1
-    assert len(set(mismatches)) == len(mismatches)
+    assert len(set(mismatches)) == len(mismatches) == 10
 
 def test_set_remove(FIHash):
-    matches = FIHash.matches()
-    mismatches = FIHash.mismatches()
+    matches = FIHash.matches(10)
+    mismatches = FIHash.mismatches(10)
 
     matches_set = set(matches)
     for m in matches:

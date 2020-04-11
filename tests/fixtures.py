@@ -7,7 +7,7 @@ class FABC(ABC):
     InstanceType = object
     @classmethod
     @abstractmethod
-    def instances(cls):
+    def instances(cls, num):
         """List of instances of a specific type"""
         raise NotImplementedError
 

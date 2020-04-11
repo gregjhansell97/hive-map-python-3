@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from threading import Lock
-
 from hmap.matching.topic_based.abc.subs import HashableTopicBasedSub
 from hmap.matching.topic_based.abc.topics import HashableTopic
 
@@ -12,9 +10,8 @@ def template(T):
     """Many Topic combinations cannot write them all out, template function 
     creates subscription classes of a certain Topic 
     """
-    with template.lock:
-        if T in template.sub_templates:
-            return template.sub_templates[T]
+    if T in template.sub_templates:
+        return template.sub_templates[T]
 
     if issubclass(T, HashableTopic):
         class S(HashableTopicBasedSub):
@@ -27,11 +24,8 @@ def template(T):
     else:
         raise TypeError(f"{T}'s default impl is not supported")
 
-    with template.lock:
-        if T not in template.sub_templates:
-            template.sub_templates[T] = S
-    return template.sub_templates[T]
+    template.sub_templates[T] = S
+    return S
 
 
 template.sub_templates = {}
-template.lock = Lock()

@@ -20,14 +20,14 @@ class FHashableTopicBasedAlgorithm(FTopicBasedAlgorithm):
 
 class FFlatIntPyObjAlgorithm(FHashableTopicBasedAlgorithm):
     @classmethod
-    def instances(cls):
-        return [template("FlatInt", "PyObj") for i in range(10)]
+    def instances(cls, num):
+        return [template("FlatInt", "PyObj") for i in range(num)]
     @classmethod
-    def subs(cls): 
-        return FFlatIntSub.instances()
+    def subs(cls, num): 
+        return FFlatIntSub.instances(num)
     @classmethod
-    def events(cls):
-        return FFlatIntPyObjEvent.instances()
+    def events(cls, num):
+        return FFlatIntPyObjEvent.instances(num)
 
 base_fixtures = {FTopicBasedAlgorithm, FHashableTopicBasedAlgorithm}
 impl_fixtures = {FFlatIntPyObjAlgorithm}

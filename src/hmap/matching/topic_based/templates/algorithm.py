@@ -25,25 +25,19 @@ def template(Topic, Msg):
         except AttributeError:
             raise TypeError("invalid topic type")
 
-    # try to get from already made templates
-    with template.lock:
-        if (Topic, Msg) in template.algorithm_templates:
-            return template.algorithm_templates[(Topic, Msg)]
-
-    # could not find already made template, must make one
     class Algorithm(abc.Algorithm):
+        def __init__(self):
+            self.__E = event.template(Topic, Msg)
+            self.__S = sub.template(Topic)
         @property
         def Event(self):
-            return event.template(Topic, Msg)
+            return self.__E
         @property
         def Sub(self):
-            return sub.template(Topic)
+            return self.__S
 
     with template.lock:
-        if (Topic, Msg) not in template.algorithm_templates:
-            template.algorithm_templates[(Topic, Msg)] = Algorithm()
-    return template.algorithm_templates[(Topic, Msg)]
+        # because access to templates is not thread-safe
+        return Algorithm()
 
-
-template.algorithm_templates = {}
 template.lock = Lock()

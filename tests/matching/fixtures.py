@@ -21,29 +21,28 @@ class FSub(FMatchingComponent):
 class FSubCollection(FMatchingComponent):
     InstanceType = Sub.Collection
     @classmethod
-    def instances(cls):
+    def instances(cls, num):
         Collection = cls.InstanceType
-        subs = cls.subs()
-        collections = [Collection() for _ in range(5)]
-        assert len(subs) > len(collections), f"Need more subs than collections"
+        subs_per_collection = 10
+        subs = cls.subs(subs_per_collection*num)
+        collections = [Collection() for _ in range(num)]
         for s, i in zip(subs, range(len(subs))):
             collections[i%len(collections)].add(s)
-        collections.append(Collection()) #empty collection
         return collections
     @classmethod
     @abstractmethod
-    def subs(cls):
+    def subs(cls, num):
         raise NotImplementedError
 
 class FAlgorithm(FABC):
     InstanceType = Algorithm
     @classmethod
     @abstractmethod
-    def subs(cls):
+    def subs(cls, num):
         raise NotImplementedError
     @classmethod
     @abstractmethod
-    def events(cls):
+    def events(cls, num):
         raise NotImplementedError
 
 

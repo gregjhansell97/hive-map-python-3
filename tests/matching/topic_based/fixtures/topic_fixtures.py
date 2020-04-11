@@ -15,14 +15,14 @@ from tests.interfaces.fixtures import FIHash, FISerialize
 class FTopic(FISerialize):
     InstanceType = Topic
     @classmethod
-    def instances(cls):
-        return [cls.InstanceType(c) for c in cls.tcontents()]
+    def instances(cls, num):
+        return [cls.InstanceType(c) for c in cls.tcontents(num)]
     @classmethod
     def equal(cls, t1, t2):
         return t1.content == t2.content
     @classmethod
     @abstractmethod
-    def tcontents(cls):
+    def tcontents(cls, num):
         raise NotImplementedError
     @classmethod
     @abstractmethod
@@ -32,30 +32,25 @@ class FTopic(FISerialize):
 class FHashableTopic(FTopic, FIHash):
     InstanceType = HashableTopic
     @classmethod
-    def mismatches(cls):
-        return cls.instances()
+    def mismatches(cls, num):
+        return cls.instances(num)
 
 class FFlatNumber(FHashableTopic):
     max_value = 0
     min_value = 0
     @classmethod
-    def matches(cls):
+    def matches(cls, num):
         topic = random.randrange(cls.min_value, cls.max_value + 1)
-        return [cls.InstanceType(topic) for _ in range(10)]
+        return [cls.InstanceType(topic) for _ in range(num)]
     @classmethod
     def invalid_tcontents(cls):
         return {"nope", cls.max_value + 1, cls.min_value - 1}
 
     @classmethod
-    def tcontents(cls):
-        contents = {0}
-        contents.update({
+    def tcontents(cls, num):
+        return {
             cls.max_value - offset
-            for offset in range(5)})
-        contents.update({
-            cls.min_value + offset
-            for offset in range(5)})
-        return contents
+            for offset in range(num)}
 
 class FFlatInt(FFlatNumber):
     InstanceType = FlatInt

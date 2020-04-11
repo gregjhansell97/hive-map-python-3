@@ -4,7 +4,7 @@
 import pytest
 
 def test_serialization_equality(FISerialize):
-    instances = FISerialize.instances()
+    instances = FISerialize.instances(5)
     equal = FISerialize.equal
     serialize = instances[0].__class__.serialize
     deserialize = instances[0].__class__.deserialize

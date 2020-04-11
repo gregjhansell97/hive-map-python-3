@@ -36,11 +36,11 @@ class FTopicBasedSub(FSub):
         cb.log = []
         return cb
     @classmethod
-    def instances(cls):
-        topics = cls.topics()
+    def instances(cls, num_subs):
+        subs_per_topic = 5
+        num_topics = num_subs // subs_per_topic + 1
+        topics = cls.topics(num_topics)
         S = cls.InstanceType
-        subs_per_topic = 10
-        num_subs = subs_per_topic*len(topics)
         return [
                 S(topics[i%len(topics)].content, cls.get_callback()) 
                 for i in range(num_subs)]
@@ -49,20 +49,20 @@ class FTopicBasedSub(FSub):
         return (s1.topic.content == s2.topic.content)
     @classmethod
     @abstractmethod
-    def topics(cls): 
+    def topics(cls, num): 
         raise NotImplementedError
 
 class FFlatIntSub(FTopicBasedSub):
     InstanceType = sub_template(FFlatInt.InstanceType)
     @classmethod
-    def topics(cls): 
-        return FFlatInt.instances()
+    def topics(cls, num): 
+        return FFlatInt.instances(num)
 
 class FFlatIntSubCollection(FTopicBasedSubCollection):
     InstanceType = sub_template(FFlatInt.InstanceType).Collection
     @classmethod
-    def subs(cls):
-        return FFlatIntSub.instances()
+    def subs(cls, num):
+        return FFlatIntSub.instances(num)
 
 base_fixtures = {FTopicBasedSub}
 impl_fixtures = {FFlatIntSub, FFlatIntSubCollection}

@@ -16,14 +16,15 @@ from tests.matching.topic_based.fixtures.msg_fixtures import FPyObj
 class FTopicBasedEvent(FEvent):
     InstanceType = TopicBasedEvent
     @classmethod
-    def instances(cls):
-        topics = cls.topics()
-        msgs = cls.msgs()
+    def instances(cls, num_events):
+        events_per_topic = 5
+        num_topics = (num_events//events_per_topic) + 1
+        topics = [t.content for t in cls.topics(num_topics)]
+        msgs = [m.content for m in cls.msgs(num_events)]
         E = cls.InstanceType
-        events_per_topic = 10
-        num_events = events_per_topic*len(topics)
+
         return [
-                E(topics[i%len(topics)].content, random.choice(msgs).content) 
+                E(topics[i%len(topics)], random.choice(msgs)) 
                 for i in range(num_events)]
     @classmethod
     def equal(cls, e1, e2):
@@ -31,21 +32,21 @@ class FTopicBasedEvent(FEvent):
                 e1.topic.content == e2.topic.content)
     @classmethod
     @abstractmethod
-    def topics(cls): 
+    def topics(cls, num): 
         raise NotImplementedError
     @classmethod
     @abstractmethod
-    def msgs(cls):
+    def msgs(cls, num):
         raise NotImplementedError
 
 class FFlatIntPyObjEvent(FTopicBasedEvent):
     InstanceType = event_template(FFlatInt.InstanceType, FPyObj.InstanceType)
     @classmethod
-    def topics(cls): 
-        return FFlatInt.instances()
+    def topics(cls, num): 
+        return FFlatInt.instances(num)
     @classmethod
-    def msgs(cls):
-        return FPyObj.instances()
+    def msgs(cls, num):
+        return FPyObj.instances(num)
 
 base_fixtures = {FTopicBasedEvent}
 impl_fixtures = {FFlatIntPyObjEvent}

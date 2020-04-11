@@ -4,7 +4,7 @@
 import pytest
 
 def test_is_equal_noequal_properties(FIEquality):
-    instances = FIEquality.instances()
+    instances = FIEquality.instances(10)
     for i in instances:
         for j in instances:
             if i is j:
@@ -20,12 +20,12 @@ def test_is_equal_noequal_properties(FIEquality):
                 assert not j == i
                 assert not i == j
 def test_equality(FIEquality):
-    matches = FIEquality.matches()
+    matches = FIEquality.matches(10)
     for i in matches:
         for j in matches:
             assert i == j
 def test_inequality(FIEquality):
-    mismatches = FIEquality.mismatches()
+    mismatches = FIEquality.mismatches(10)
     for i in mismatches:
         ref_count = 0
         for j in mismatches:

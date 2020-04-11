@@ -11,12 +11,15 @@
 from tests.fixtures import base_fixtures, impl_fixtures, FABC
 import tests.matching as matching
 import tests.interfaces as interfaces
+import tests.communication as communication
 
 base_fixtures |= matching.base_fixtures
 base_fixtures |= interfaces.base_fixtures
+base_fixtures |= communication.base_fixtures
 
 impl_fixtures |= matching.impl_fixtures 
 impl_fixtures |= interfaces.impl_fixtures
+impl_fixtures |= communication.impl_fixtures
 
 def pytest_generate_tests(metafunc):
     """

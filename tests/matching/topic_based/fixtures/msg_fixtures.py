@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
+import random
 
 import pytest
 
@@ -19,8 +20,10 @@ class FMsg(FISerialize):
 class FPyObj(FMsg):
     InstanceType = PyObj
     @classmethod
-    def instances(cls):
-        return [PyObj("A"), PyObj((1, 2, 3)), PyObj(FMsg)]
+    def instances(cls, num):
+        return [
+                PyObj((i, str(i), hash(i), None))
+                for i in range(num)]
 
 base_fixtures = {FMsg}
 impl_fixtures = {FPyObj}
