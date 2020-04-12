@@ -74,11 +74,13 @@ def test_interest_map_properties(FInterest):
     with pytest.raises(KeyError):
         map1.remove(*items[0])
 
-def test_algorithm(FAlgorithm):
-    algo = FAlgorithm.instances(1)[0]
-    Interest = FAlgorithm.FInterest.Type
-    Event = FAlgorithm.FEvent.Type
-    Subscription = FAlgorithm.FSubscription.Type
+def test_algorithm(FMatcher):
+    algo = FMatcher.instances(1)[0]
+    assert algo == algo
+    assert not algo != algo
+    Interest = FMatcher.FInterest.Type
+    Event = FMatcher.FEvent.Type
+    Subscription = FMatcher.FSubscription.Type
     # check compatability
     issubclass(Interest, algo.Interest)
     issubclass(Interest.Map, algo.Interest.Map)
@@ -86,8 +88,8 @@ def test_algorithm(FAlgorithm):
     issubclass(Subscription, algo.Subscription)
     # may not be able to assert much, but can crash test it
     # and test it for consistency
-    events = FAlgorithm.events(30)
-    subscriptions = FAlgorithm.subscriptions(10)
+    events = FMatcher.events(30)
+    subscriptions = FMatcher.subscriptions(10)
     map_ = Interest.Map()
     # EMPTYNESS
     for e in events:

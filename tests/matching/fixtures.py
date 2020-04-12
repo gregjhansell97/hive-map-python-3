@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 import pytest
 
-from hmap.matching import Event, Subscription, Interest, Algorithm
+from hmap.matching import Event, Subscription, Interest, Matcher
 from tests.interfaces.fixtures import FISerialize
 from tests.fixtures import FABC
 
@@ -18,8 +18,8 @@ class FSubscription(FABC):
 class FInterest(FISerialize):
     Type = Interest
 
-class FAlgorithm(FABC):
-    Type = Algorithm
+class FMatcher(FABC):
+    Type = Matcher
     FInterest = None
     FEvent = None
     FSubscription = None
@@ -37,6 +37,6 @@ class FAlgorithm(FABC):
         return cls.FEvent.instances(num)
 
 
-base_fixtures = {FEvent, FInterest, FSubscription, FAlgorithm}
+base_fixtures = {FEvent, FInterest, FSubscription, FMatcher}
 impl_fixtures = set()
 

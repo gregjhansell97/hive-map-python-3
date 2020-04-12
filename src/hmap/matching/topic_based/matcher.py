@@ -16,7 +16,7 @@ import hmap.matching.topic_based.msg_types as msg_types
 
 
 lock = Lock() # module level lock for all algorithms
-class Algorithm(abc.Algorithm):
+class Matcher(abc.Matcher):
     def __init__(self, Topic, Msg):
         # import topics if not explicitly given
         if type(Topic) is str:

@@ -56,7 +56,7 @@ class Subscription:
         """
         raise NotImplementedError
 
-class Algorithm(ABC):
+class Matcher(ABC):
     """Base class all matching algorithms follow"""
     @property
     @abstractmethod
@@ -74,3 +74,10 @@ class Algorithm(ABC):
     def Subscription(self):
         """Subscription implementation for the matching algorithm"""
         raise NotImplementedError
+
+    def __ne__(self, other): 
+        return not (self == other)
+    def __eq__(self, other):
+        return ( self.Interest is other.Interest and 
+                self.Event is other.Event and 
+                self.Subscription is other.Subscription)

@@ -1,36 +1,43 @@
 import hmap
 from hmap import Router
-from hmap.matching import TopicBased
+from hmap.matching import topic_based
 from some_module import GossipRouter
 
 # don't need context for base router
 def on_simple(topic, msg):
     print((topic, msg))
 r = Router(
-        matching=TopicBased("FlatInteger", "PyObj"))
+        matcher=topic_based.Matcher("FlatInteger", "PyObj"))
 r.subscribe(1, on_simple)
 r.publish(1, ("hello world", 1, 2, 3))
 
 
 # may need context
-from hmap.context.properties import LocationInterface, BatteryLevelInterface \
-        ZMQInterface
+from hmap.interfaces import ILoc, IBatteryLevel, IZmq
 
-class MyContext(
-        ZMQInterface,
-        LocationInterface,
-        PowerLevelInterface):
+class MyContext(ILoc, IBatteryLevel, IZmq)
     pass # you may need to define initial locations for some of you
 
 ctx = MyContext(loc=(1, 2))
 
+from hmap.communication.client_server import ZmqClient
+
+single_server_router = SingleServerRouter(
+        password = "wilkommen",
+        matcher = topic_based.Matcher("FlatInt", "PyObj"))
+single_server_router.client = ZmqClient("ipc:///tmp/server123")
+
+hnet = hmap.Network([single_server_router])
+
+hnet.publish("hello world")
+
 # some algorithms may not need a context
 hint_router = HintRouter(
         context=MyContext
-        matching=TopicBased("FlatInteger", "Bytes")a)
+        matcher=topic_based.Matcher("FlatInt", "Bytes"))
 gossip_router = GossipRouter(
         context=ctx,
-        matching=TopicBased("StringHierarchy", "PyObj"),
+        matcher=topic_based.Matcher("StringHierarchy", "PyObj"),
         probability=0.5)
 
 # create an entry-point into the network (supply routers too)
