@@ -9,7 +9,7 @@ class FInterface(FABC):
     pass
 
 class FIEquality(FInterface):
-    InstanceType = IEquality
+    Type = IEquality
     @classmethod
     @abstractmethod
     def matches(cls, num):
@@ -23,10 +23,10 @@ class FIEquality(FInterface):
         raise NotImplementedError
 
 class FIHash(FIEquality):
-    InstanceType = IHash
+    Type = IHash
 
 class FISerialize(FInterface):
-    InstanceType = ISerialize
+    Type = ISerialize
     @classmethod
     @abstractmethod
     def equal(cls, i1, i2):

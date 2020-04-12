@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from hmap.matching.topic_based.templates.algorithm import template
+from hmap.matching.topic_based.algorithm import Algorithm
+from hmap.matching.topic_based.abc import (
+        Topic, HashableTopic, Msg)
 
-__all__ = ["template"]
+__all__ = ["Algorithm", "Topic", "HashableTopic", "Msg"]

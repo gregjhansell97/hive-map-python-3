@@ -5,47 +5,38 @@ from abc import ABC, abstractmethod
 
 import pytest
 
-from hmap.matching.abc import Event, Sub, Algorithm
+from hmap.matching import Event, Subscription, Interest, Algorithm
 from tests.interfaces.fixtures import FISerialize
 from tests.fixtures import FABC
 
-class FMatchingComponent(FISerialize):
-    InstanceType = object
+class FEvent(FISerialize) :
+    Type = Event
 
-class FEvent(FMatchingComponent):
-    InstanceType = Event
+class FSubscription(FABC):
+    Type = Subscription
 
-class FSub(FMatchingComponent):
-    InstanceType = Sub
-
-class FSubCollection(FMatchingComponent):
-    InstanceType = Sub.Collection
-    @classmethod
-    def instances(cls, num):
-        Collection = cls.InstanceType
-        subs_per_collection = 10
-        subs = cls.subs(subs_per_collection*num)
-        collections = [Collection() for _ in range(num)]
-        for s, i in zip(subs, range(len(subs))):
-            collections[i%len(collections)].add(s)
-        return collections
-    @classmethod
-    @abstractmethod
-    def subs(cls, num):
-        raise NotImplementedError
+class FInterest(FISerialize):
+    Type = Interest
 
 class FAlgorithm(FABC):
-    InstanceType = Algorithm
+    Type = Algorithm
+    FInterest = None
+    FEvent = None
+    FSubscription = None
     @classmethod
     @abstractmethod
-    def subs(cls, num):
-        raise NotImplementedError
+    def interests(cls, num):
+        return cls.FInterest.instances(num)
+    @classmethod
+    @abstractmethod
+    def subscriptions(cls, num):
+        return cls.FSubscription.instances(num)
     @classmethod
     @abstractmethod
     def events(cls, num):
-        raise NotImplementedError
+        return cls.FEvent.instances(num)
 
 
-base_fixtures = {FMatchingComponent, FEvent, FSub, FSubCollection, FAlgorithm}
+base_fixtures = {FEvent, FInterest, FSubscription, FAlgorithm}
 impl_fixtures = set()
 

@@ -12,13 +12,13 @@ from hmap.matching.topic_based.msg_types import PyObj
 from tests.interfaces.fixtures import FISerialize
 
 class FMsg(FISerialize):
-    InstanceType = Msg
+    Type = Msg
     @classmethod
     def equal(cls, m1, m2):
         return m1.content == m2.content
 
 class FPyObj(FMsg):
-    InstanceType = PyObj
+    Type = PyObj
     @classmethod
     def instances(cls, num):
         return [

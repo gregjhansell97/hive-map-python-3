@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import hmap.matching.topic_based as topic_based
+from hmap.matching.abc import Event, Subscription, Interest, Algorithm
 
-TopicBased = topic_based.template
-
-__all__ = ["TopicBased"]
+__all__ = ["Event", "Subscription", "Interest", "Algorithm"]

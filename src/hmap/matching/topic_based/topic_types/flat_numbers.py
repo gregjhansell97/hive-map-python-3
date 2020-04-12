@@ -4,7 +4,7 @@
 from abc import abstractmethod
 import struct
 
-from hmap.matching.topic_based.abc.topics import HashableTopic
+from hmap.matching.topic_based.abc import HashableTopic
 
 
 class FlatNumber(HashableTopic):

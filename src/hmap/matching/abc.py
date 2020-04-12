@@ -6,14 +6,33 @@ import weakref
 
 from hmap.interfaces import ISerialize
 
+class Interest(ISerialize):
+    class Map:
+        @property
+        @abstractmethod
+        def interests():
+            raise NotImplementedError
+        @abstractmethod
+        def add(self, interest, val):
+            """
+            """
+            raise NotImplementedError
+        @abstractmethod
+        def remove(self, interest, val):
+            """
+            """
+            raise NotImplementedError
+        @abstractmethod
+        def match(self, event):
+            """
+            """
+            raise NotImplementedError
 
 class Event(ISerialize):
     """Base class for Event creation in the pub-sub system"""
-
     pass
 
-
-class Sub(ISerialize):
+class Subscription:
     """Base class for Subscription in the pub-sub system. The data that a
     subscription holds is considered to be immutable: breaking this assumption
     can cause issues with the get_matches of the Subscriptions class
@@ -23,7 +42,11 @@ class Sub(ISerialize):
     lose the callback in the process which is the important part of a
     subscription.
     """
-
+    def __init__(self, interest):
+        self.__interest = interest
+    @property
+    def interest(self):
+        return self.__interest
     @abstractmethod
     def notify(self, event):
         """Notifies a subscription about an event it would be interested in
@@ -33,57 +56,12 @@ class Sub(ISerialize):
         """
         raise NotImplementedError
 
-    class Collection(ISerialize):
-        """Base class for managing multiple subscriptions"""
-        # NOTE serialization does not necessarily mean component wise agreement
-        # the serialization process could simply depict what the colleciton
-        # embodies (like the currently interested topics...
-        # subscribe option to it ... almost like a subscription...
-
-        @abstractmethod
-        def __iter__(self):
-            # for iterating over all subs
-            raise NotImplementedError
-
-        @abstractmethod
-        def extend(self, sub_collection):
-            # addes the items of one sub_collection into another
-            raise NotImplementedError
-
-        @abstractmethod
-        def add(self, subscription):
-            """Adds subscription to the group of subscriptions
-
-            Args:
-                subscription(Sub): subscription being added to group of 
-                    subscriptions
-            """
-            raise NotImplementedError
-
-        @abstractmethod
-        def remove(self, subscription):
-            """Removes subscription from the group of subscriptions if it exists
-        
-            Args:
-                subscription(Sub): subscription being removed
-            """
-            raise NotImplementedError
-
-        @abstractmethod
-        def matches(self, event):
-            """Gets a iteralable object of subscriptions that match an event
-
-            Args:
-                event(Event): matching event
-
-            Returns:
-                (object): iterable object of subscriptions event matches
-            """
-            raise NotImplementedError
-
-
 class Algorithm(ABC):
     """Base class all matching algorithms follow"""
+    @property
+    @abstractmethod
+    def Interest(self): 
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -93,6 +71,6 @@ class Algorithm(ABC):
 
     @property
     @abstractmethod
-    def Sub(self):
+    def Subscription(self):
         """Subscription implementation for the matching algorithm"""
         raise NotImplementedError

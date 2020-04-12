@@ -8,7 +8,7 @@ def test_type(FABC):
     superclasses = set()
     for F in FABC.mro():
         try:
-            superclasses.add(F.InstanceType)
+            superclasses.add(F.Type)
         except AttributeError:
             pass
     for i in instances:

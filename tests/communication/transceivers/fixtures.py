@@ -10,7 +10,7 @@ from hmap.communication.transceivers.sim import LocalTransceiver
 from tests.communication.fixtures import FCommunication
 
 class FSimTransceiver(FCommunication):
-    InstanceType = Transceiver
+    Type = Transceiver
     @classmethod
     def get_callback(cls):
         def cb(trx, data):
@@ -30,11 +30,11 @@ class FSimTransceiver(FCommunication):
         pass # waits for all transceivers to be down dispatching
 
 class FLocalTransceiver(FSimTransceiver):
-    InstanceType = LocalTransceiver
+    Type = LocalTransceiver
     @classmethod
     @abstractmethod
     def instances(cls, num):
-        return [cls.InstanceType() for _ in range(num)]
+        return [cls.Type() for _ in range(num)]
     @classmethod
     @abstractmethod
     def isolated_transceivers(cls, num):

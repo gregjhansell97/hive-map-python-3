@@ -13,10 +13,10 @@ from hmap.matching.topic_based.topic_types import (
 from tests.interfaces.fixtures import FIHash, FISerialize
 
 class FTopic(FISerialize):
-    InstanceType = Topic
+    Type = Topic
     @classmethod
     def instances(cls, num):
-        return [cls.InstanceType(c) for c in cls.tcontents(num)]
+        return [cls.Type(c) for c in cls.tcontents(num)]
     @classmethod
     def equal(cls, t1, t2):
         return t1.content == t2.content
@@ -30,7 +30,7 @@ class FTopic(FISerialize):
         raise NotImplementedError
 
 class FHashableTopic(FTopic, FIHash):
-    InstanceType = HashableTopic
+    Type = HashableTopic
     @classmethod
     def mismatches(cls, num):
         return cls.instances(num)
@@ -41,7 +41,7 @@ class FFlatNumber(FHashableTopic):
     @classmethod
     def matches(cls, num):
         topic = random.randrange(cls.min_value, cls.max_value + 1)
-        return [cls.InstanceType(topic) for _ in range(num)]
+        return [cls.Type(topic) for _ in range(num)]
     @classmethod
     def invalid_tcontents(cls):
         return {"nope", cls.max_value + 1, cls.min_value - 1}
@@ -53,22 +53,22 @@ class FFlatNumber(FHashableTopic):
             for offset in range(num)}
 
 class FFlatInt(FFlatNumber):
-    InstanceType = FlatInt
+    Type = FlatInt
     max_value = (2**32)//2 - 1
     min_value = -(2**32)//2
 
 class FFlatUInt(FFlatNumber):
-    InstanceType = FlatUInt
+    Type = FlatUInt
     max_value = (2**32) - 1
     min_value = 0
 
 class FFlatByte(FFlatNumber):
-    InstanceType = FlatByte
+    Type = FlatByte
     max_value = 127
     min_value = -128
 
 class FFlatUByte(FFlatNumber):
-    InstanceType = FlatUByte
+    Type = FlatUByte
     max_value = 255
     min_value = 0
 

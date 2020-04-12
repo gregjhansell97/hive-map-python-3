@@ -6,22 +6,24 @@ import random
 
 import pytest
 
-from hmap.matching.topic_based.abc import TopicBasedEvent
-from hmap.matching.topic_based.templates.event import template as event_template
+from hmap.matching.topic_based.templates import Event
 # tests
 from tests.matching.fixtures import FEvent
 from tests.matching.topic_based.fixtures.topic_fixtures import FFlatInt
 from tests.matching.topic_based.fixtures.msg_fixtures import FPyObj
 
+#TODO make sure consistent topic, msg with FTopic and FMsg
 class FTopicBasedEvent(FEvent):
-    InstanceType = TopicBasedEvent
+    Type = Event
+    FTopic = None
+    FMsg = None
     @classmethod
     def instances(cls, num_events):
         events_per_topic = 5
         num_topics = (num_events//events_per_topic) + 1
         topics = [t.content for t in cls.topics(num_topics)]
         msgs = [m.content for m in cls.msgs(num_events)]
-        E = cls.InstanceType
+        E = cls.Type
 
         return [
                 E(topics[i%len(topics)], random.choice(msgs)) 
@@ -31,22 +33,16 @@ class FTopicBasedEvent(FEvent):
         return (e1.msg.content == e2.msg.content and 
                 e1.topic.content == e2.topic.content)
     @classmethod
-    @abstractmethod
     def topics(cls, num): 
-        raise NotImplementedError
+        return cls.FTopic.instances(num)
     @classmethod
-    @abstractmethod
     def msgs(cls, num):
-        raise NotImplementedError
+        return cls.FMsg.instances(num)
 
 class FFlatIntPyObjEvent(FTopicBasedEvent):
-    InstanceType = event_template(FFlatInt.InstanceType, FPyObj.InstanceType)
-    @classmethod
-    def topics(cls, num): 
-        return FFlatInt.instances(num)
-    @classmethod
-    def msgs(cls, num):
-        return FPyObj.instances(num)
+    Type = Event.template_class(FFlatInt.Type, FPyObj.Type)
+    FTopic = FFlatInt
+    FMsg = FPyObj
 
 base_fixtures = {FTopicBasedEvent}
 impl_fixtures = {FFlatIntPyObjEvent}

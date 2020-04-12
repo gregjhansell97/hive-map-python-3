@@ -4,7 +4,7 @@
 import pickle
 import struct
 
-from hmap.matching.topic_based.abc.msgs import Msg
+from hmap.matching.topic_based.abc import Msg
 
 
 class PyObj(Msg):
