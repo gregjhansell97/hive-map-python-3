@@ -8,51 +8,31 @@ class Router:
     the router to subscriptions on the router.
     """
 
-    def __init__(self, *, matching):
+    def __init__(self, *, matcher):
         """
         Args:
             matching: algorithm used for event and subscription creation
         """
         super().__init__()
-        if not self.is_valid_matching(matching):
+        if not self.is_valid_matcher(matcher):
             raise ValueError("Invalid matching algorithm")
-        self.__matching = matching
-        self.__subscriptions = matching.Subscriptions()
-
+        self.__matcher = matcher
     @property
-    def subscriptions(self):
-        """Subscriptions local publishers and subscribers are interested in"""
-        return self.__subscriptions
-
-    @property
-    def matching(self):
+    def matcher(self):
         """Algorithm used for event and subscription creation"""
-        return self.__matching
+        return self.__matcher
 
-    def publish(self, *args, **kwargs):
-        """Publishes an event. Do not override in child classes, see on_publish
-        
-        Args:
-            *args: arguments passed to matching algorithm's Event constructor
-            **kwargs: keyword arguments passed to matching algorithm's Event
-                constructor
+    @property
+    def network(self):
+        # check if none raise value error
+        # weak reference too
+        return self.__network
+
+    def start(self, network):
         """
-        e = self.__matching.Event(*args, **kwargs)
-        self.on_publish(e)
-
-    def subscribe(self, *args, **kwargs):
-        """Creates a subscription. Do not override in child classes, see
-            on_subscribe 
-
-        Args:
-            *args: arguments passed to matching algorithm's Subscription 
-                constructor
-            **kwargs: keyword arguments passed to matching algorithm's 
-                Subscription constructor
         """
-        s = self.__matching.Subscription(*args, **kwargs)
-        self.on_subscription(s)
-        return s
+        # assign network variable
+        pass
 
     def on_publish(self, event):
         """Invoked when publish occurs local to the router
@@ -60,16 +40,12 @@ class Router:
         Args:
             event: local event
         """
-        for s in self.subscriptions.matches(event):
-            self.notify(s)
+        pass
 
-    def on_subscribe(self, subscription):
-        """Invoked when subscription is created local to the router
-
-        Args:
-            subscription: local subscription
+    def on_router_publish(self, event):
         """
-        self.__subscriptions.add(subscription)
+        """
+        pass
 
     def is_valid_matching(self, algo):
         """Determines if matching algorithm can be used in routing protocol"""

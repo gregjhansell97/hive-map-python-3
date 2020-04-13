@@ -19,6 +19,10 @@ class Network:
         # private helpers 
         self.__matcher = matcher
         self.__subscriptions = self.__Interest.Map()
+        self.__routers = routers
+        for r in self.__routers:
+            # TODO error handling machinery
+            r.start(network)
     @property
     def interests(self):
         return self.__subscriptions.interests
@@ -30,17 +34,14 @@ class Network:
         for s in self.__subscriptions.match(e):
             s.notify(e)
         for r in self.__routers:
-            r.notify(e)
+            r.on_publish(e)
     def subscribe(self, *args, **kwargs):
         s = self.__Sub(*args, **kwargs)
         self.__subscriptions.add(s)
-    def router_publish(self, router, event, local=False):
+    def router_publish(self, router, event):
         for s in self.__subscriptions.match(e):
             s.notify(e)
-        # limit the event to only local subscriptions
-        if local:
-            return 
         for r in self.__routers:
             if r is router:
                 continue
-            r.notify(e)
+            r.on_router_publish(e)

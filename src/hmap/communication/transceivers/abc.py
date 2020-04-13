@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 import math
 
 
+#IStartStop
 class Transceiver(ABC):
     """Abstract base class for all transceivers. Transceivers are event-driven;
     callbacks are invoked upon receiving a transmission

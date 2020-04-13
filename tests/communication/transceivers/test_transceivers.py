@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+import time
 
+from hmap.communication.transceivers.ipc import Transceiver as IPCTransceiver
 
 def test_isolated_transceivers(FSimTransceiver):
     get_cb = FSimTransceiver.get_callback
@@ -138,5 +140,22 @@ def test_changing_connections(FLocalTransceiver):
 
 
     
+
+def test_simple_ipc_transceiver():
+    t1 = IPCTransceiver("./.test-simple-ipc")
+    t2 = IPCTransceiver("./.test-simple-ipc")
+    t1.start()
+    t2.start()
+    def callback(trx, data):
+        callback.log.append(data)
+    callback.log = []
+    t1.transmit(b"hello")
+    t2.subscribe(callback)
+    time.sleep(1)
+    assert callback.log == [b'hello']
+    t1.stop()
+    t2.stop()
+    
+
 
 
