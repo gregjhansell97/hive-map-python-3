@@ -142,14 +142,6 @@ def test_changing_connections(FLocalTransceiver):
     
 
 def test_simple_ipc_transceiver():
-    t1 = IPCTransceiver("./.will-this-work")
-    t1.start()
-    try:
-        assert t1.leader
-    except Exception as e:
-        t1.stop()
-        raise e
-    '''
     t1 = IPCTransceiver("./.test-simple-ipc")
     t2 = IPCTransceiver("./.test-simple-ipc")
     t1.start()
@@ -163,7 +155,6 @@ def test_simple_ipc_transceiver():
     assert callback.log == [b'hello']
     t1.stop()
     t2.stop()
-    '''
 
 
 
