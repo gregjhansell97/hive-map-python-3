@@ -11,14 +11,14 @@ class Subscription(abc.Subscription):
         # topic arg lets me deserialize
         #TODO check to make sure callback is valid
         topic = self.Interest.Topic(tcontent)
-        super().__init__(self.Interest(topic))
+        super().__init__(self.Interest([topic]))
         self.__callback = callback
     @property
     def callback(self):
         return self.__callback
     @property
     def topic(self):
-        return self.interest.topic.content
+        return self.interest.topics[0].content
     def notify(self, event):
         # subscription can't call None
         self.__callback(event.topic.content, event.msg.content)

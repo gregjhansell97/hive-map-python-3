@@ -19,10 +19,13 @@ class FTopicBasedInterest(FInterest):
     def instances(cls, num):
         # a topic for each interest
         I = cls.Type
-        return [I(t) for t in cls.topics(num)]
+        return [I([t]) for t in cls.topics(num)]
     @classmethod
     def equal(cls, i1, i2):
-        return (i1.topic.content == i2.topic.content)
+        topics1 = set([t.content for t in i1.topics])
+        topics2 = set([t.content for t in i2.topics])
+        #TODO more elaborate means of equivalency
+        return topics1 == topics2
     @classmethod
     def topics(cls, num): 
         return cls.FTopic.instances(num)

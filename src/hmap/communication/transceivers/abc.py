@@ -7,54 +7,69 @@ from abc import ABC, abstractmethod
 import math
 
 
-#IStartStop
 class Transceiver(ABC):
-    """Abstract base class for all transceivers. Transceivers are event-driven;
-    callbacks are invoked upon receiving a transmission
+    """Abstract base class for all transceivers. Transceivers transmit and
+    receive data from neighboring transceivers.
     """
 
-    def __init__(self):
-        # raw data delivered to callback with transceiver delivering it
-        self.__callbacks = []  # callback(trx, data)
-
     @abstractmethod
-    def transmit(self, data):
-        """Transmits data to other transceivers listening
+    def transmit(self, data, timeout=None):
+        """Transmits data to other transceivers within communication range
         
         Args:
             data(bytes): data to transmit on network
+
+        Raises:
+            - if data is too large
+            - if data are not bytes
+            - if transceiver is closed while transmiting
+            - if past timeout and couldn't send information
         """
         raise NotImplementedError
 
-    def receive(self, data):
-        """Receives data from another transceiver
+    @abstractmethod
+    def receive(self, timeout=None):
+        """Receives data from another transceiver, blocks for duration of
+        timeout. If timeout is set to None, then blocks indefinitely
 
         Args:
-            data(bytes): data received from a correspond transmit from another
-                transceiver
+            timeout: duration of blocking call
+
+        Returns:
+            (bytes): data received
+
+        Raises:
+            - if there is too much data received
+            - if transceiver is closed while receiving
+            - if passed timeout and didn't receive any bytes
         """
-        for cb in self.__callbacks:
-            cb(self, data)
+        raise NotImplementedError
 
-    def subscribe(self, callback):
-        """Registers a callback to the transceiver that gets invoked when a
-        message is received
-        
-        Args:
-            callback: a callback to be invoked on new data reception
+    @abstractmethod
+    def close(self):
         """
-        #TODO make thread safe
-        if callback in self.__callbacks:
-            return
-        self.__callbacks.append(callback)
-
-    def unsubscribe(self, callback):
-        """Removes callback from list of on data reception callbacks
-
-        Args:
-            callback: callback to be removed
+        Idempotent function that ends transmission and reception capabilities
         """
-        self.__callbacks.remove(callback)
-
+        pass
+    @property
+    @abstractmethod
+    def receive_strength(self):
+        """Number between 0 and 1, a higher number indicates better message
+        transmission detection"""
+        raise NotImplementedError
+    @receive_strength.setter
+    @abstractmethod
+    def set_receive_strength(self, rcv_range):
+        raise NotImplementedError
+    @property
+    @abstractmethod
+    def transmit_strength(self):
+        """Number between 0 and 1, a higher number indicates a more robust
+        signal that is likely to reach more transceivers"""
+        raise NotImplementedError
+    @transmit_range.setter
+    @abstractmethod
+    def set_transmit_strength(self, tr_range):
+        raise NotImplementedError
 
 # TODO write a base class for packing a message

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import atexit
 from multiprocessing import Pipe, Process
 from multiprocessing.connection import Client, Listener, wait
 from threading import Thread, Lock
@@ -23,12 +24,11 @@ def session(address, trx):
                 print("client is closing nooooooo")
                 with session.lock:
                     connections.remove(client)
-                    if len(connections) == 0:
-                        # no more connections, poison process
-                        print("connections are nothing noooooo")
-                        session.stop = True
-                        trojan_client = Client(address, family="AF_UNIX")
-                        print("done with this thread")
+                    # no more connections, poison process
+                    print("connections are nothing noooooo")
+                    session.stop = True
+                    trojan_client = Client(address, family="AF_UNIX")
+                    print("done with this thread, and process")
                 return # exit the thread
             print(f"RECEIVED DATA {data}")
             for c in connections:
@@ -75,6 +75,7 @@ class Transceiver(abc.Transceiver):
         self.__poison_pill, pp = Pipe()
         self.__receive_loop = Thread(
                 target=self.receive_loop, args=((pp,)), daemon=True)
+        atexit.register(self.stop)
         # go on ahead with or without connection
     def active(self):
         return self.__active
@@ -88,7 +89,7 @@ class Transceiver(abc.Transceiver):
         # start-up the session
         session_pipe, trx_pipe = Pipe()
         daemon = Process(
-                target=session, args=((address, trx_pipe)), daemon=True)
+                target=session, args=((address, trx_pipe)))
         daemon.start()
         # wait for either session to fail or succeed
         success = (session_pipe.recv_bytes() == b"1")
@@ -101,6 +102,9 @@ class Transceiver(abc.Transceiver):
         self.__server = Client(address, family="AF_UNIX")
     def stop(self): 
         #TODO aquire lock
+        time.sleep(1)
+        if not self.__active:
+            return 
         with self.__lock:
             self.__active = False
             # end receive loop by closing server

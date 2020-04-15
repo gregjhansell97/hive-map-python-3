@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import struct
 from threading import Lock
 
 from hmap.matching import abc, topic_based
@@ -10,21 +11,35 @@ templates = {}
 
 class Interest(abc.Interest):
     Topic = None
-    def __init__(self, topic):
+    def __init__(self, topics):
         super().__init__()
-        self.__topic = topic
+        # TODO potentially remove overlaping topics
+        self.__topics = topics
     @property
-    def topic(self):
-        return self.__topic
+    def topics(self):
+        return self.__topics
     def calcsize(self):
-        return self.__topic.calcsize()
+        size = struct.calcsize("I")
+        for t in self.__topics:
+            size += t.calcsize()
+        return size
     @classmethod
     def serialize(cls, interest):
-        return cls.Topic.serialize(interest.__topic)
+        data = struct.pack("I", len(interest.__topics))
+        for t in interest.__topics:
+            data += cls.Topic.serialize(t)
+        return data
     @classmethod
     def deserialize(cls, raw_bytes):
-        t = cls.Topic.deserialize(raw_bytes)
-        return cls(t)
+        topics_len, = struct.unpack_from("I", raw_bytes, offset=0)
+        # shift raw bytes up
+        raw_bytes = raw_bytes[struct.calcsize("I"):]
+        topics = []
+        for _ in range(topics_len):
+            t = cls.Topic.deserialize(raw_bytes)
+            raw_bytes = raw_bytes[t.calcsize():]
+            topics.append(t)
+        return cls(topics)
     class Map(abc.Interest.Map):
         Interest = None
     @staticmethod
@@ -51,7 +66,10 @@ class HashMap(Interest.Map):
         self.__lock = Lock()
     @property
     def interests(self):
-        return iter([self.Interest(t) for t in self.__table.keys()])
+        topics = [t for t in self.__table.keys()]
+        if len(topics) > 0:
+            return iter([self.Interest(topics)])
+        return []
     def match(self, event):
         try:
             return iter(self.__table[event.topic])
@@ -59,16 +77,18 @@ class HashMap(Interest.Map):
             return iter([])
     def add(self, interest, val):
         with self.__lock:
-            try:
-                self.__table[interest.topic].append(val)
-            except KeyError:
-                self.__table[interest.topic] = [val]
+            for t in interest.topics:
+                try:
+                    self.__table[t].append(val)
+                except KeyError:
+                    self.__table[t] = [val]
     def remove(self, interest, val):
         with self.__lock:
-            try:
-                self.__table[interest.topic].remove(val)
-                if len(self.__table[interest.topic]) == 0:
-                    # empty list, no longer interested
-                    del self.__table[interest.topic]
-            except ValueError:
-                raise KeyError
+            for t in interest.topics:
+                try:
+                    self.__table[t].remove(val)
+                    if len(self.__table[t]) == 0:
+                        # empty list, no longer interested
+                        del self.__table[t]
+                except ValueError:
+                    raise KeyError

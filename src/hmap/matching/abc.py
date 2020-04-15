@@ -7,25 +7,25 @@ import weakref
 from hmap.interfaces import ISerialize
 
 class Interest(ISerialize):
+    """Base class for an interest in the pub-sub system"""
     class Map:
+        """Base class for a datastructure that maps interests to values""" 
         @property
         @abstractmethod
         def interests():
+            """Returns the interests of every value"""
             raise NotImplementedError
         @abstractmethod
-        def add(self, interest, val):
-            """
-            """
+        def add(self, interest, value):
+            """Links interest to the value"""
             raise NotImplementedError
         @abstractmethod
-        def remove(self, interest, val):
-            """
-            """
+        def remove(self, interest, value):
+            """Removes connection between interest and value"""
             raise NotImplementedError
         @abstractmethod
         def match(self, event):
-            """
-            """
+            """Returns all values that interests match the event specified"""
             raise NotImplementedError
 
 class Event(ISerialize):
@@ -33,15 +33,7 @@ class Event(ISerialize):
     pass
 
 class Subscription:
-    """Base class for Subscription in the pub-sub system. The data that a
-    subscription holds is considered to be immutable: breaking this assumption
-    can cause issues with the get_matches of the Subscriptions class
-
-    ALSO it seems impractical to have subs themselves be serializable, like
-    when exactly are you transmitting subscritions... never! because you would
-    lose the callback in the process which is the important part of a
-    subscription.
-    """
+    """Base class for Subscription in the pub-sub system"""
     def __init__(self, interest):
         self.__interest = interest
     @property
