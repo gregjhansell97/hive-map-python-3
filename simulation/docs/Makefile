@@ -8,7 +8,7 @@ PAPER         =
 BUILDDIR      = _build
 AUTODOCDIR    = api
 AUTODOCBUILD  = sphinx-apidoc
-PROJECT       = interface
+PROJECT       = simulation
 MODULEDIR     = ../src/hmap
 
 # User-friendly check for sphinx-build

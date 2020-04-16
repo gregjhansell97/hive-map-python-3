@@ -1,8 +1,8 @@
-=========
-interface
-=========
+======
+stdlib
+======
 
-This is the documentation of **interface**.
+This is the documentation of **stdlib**.
 
 .. note::
 
