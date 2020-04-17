@@ -48,6 +48,9 @@ class Interest(BaseInterest):
             return templates[T]
         if issubclass(T, HashableTopic):
             class I(Interest):
+                __name__ = T.__name__ + "Interest"
+                def __repr__(self):
+                    return f"{T.__name__}Interest(topics={self.topics})-{id(self)}"
                 class Map(HashMap):
                     pass
         else:

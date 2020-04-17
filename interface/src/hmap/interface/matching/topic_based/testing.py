@@ -4,8 +4,9 @@
 from abc import ABC, abstractmethod
 import random 
 
+from hmap.interface import asserts
 from hmap.interface.matching.testing import MatchingFixture
-from hmap.interface.testing import test_method
+from hmap.interface.testing import HMapFixture, test_method
 
 class TopicBasedMatchingFixture(MatchingFixture):
     @property
@@ -29,7 +30,7 @@ class TopicBasedMatchingFixture(MatchingFixture):
                 for t in topics]
     def relevant_events(self, n, i):
         events = []
-        for m in self.messages(n):
+        for m in self.msgs(n):
             t = random.choice(i.topics)
             events.append(self.matcher.Event(t.content, m.content))
         return events
@@ -39,16 +40,15 @@ class TopicBasedMatchingFixture(MatchingFixture):
         for t in i.topics:
             topics.remove(t)
         topics = topics[:n]
-        for t, m in zip(topics, self.messages(n)):
+        for t, m in zip(topics, self.msgs(n)):
             events.append(self.matcher.Event(t.content, m.content))
-    @abstractmethod
     def topics(self, n):
         """List of n unique topics"""
         raise NotImplementedError
-    @abstractmethod
-    def messages(self, n):
+    def msgs(self, n):
         """List of n unique messages"""
         raise NotImplementedError
+
 
     @test_method
     def notify_behavior(self):
@@ -57,7 +57,7 @@ class TopicBasedMatchingFixture(MatchingFixture):
         for e in events:
             s.notify(e)
             assert s.callback.log[-1] == (e.topic.content, e.msg.content)
-        assert len(s.callback.log) == len(events)
+        asserts.equal(len(s.callback.log), len(events))
     @test_method
     def topic_preservation(self):
         S = self.matcher.Subscription
@@ -65,8 +65,5 @@ class TopicBasedMatchingFixture(MatchingFixture):
         subs = [S(t.content, self.get_callback()) for t in topics]
         # topics can be accessed
         for s, t in zip(subs, topics):
-            assert s.topic == t.content
-
-
-
+            asserts.equal(s.topic, t.content)
 

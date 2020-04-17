@@ -13,9 +13,9 @@ r.publish(1, ("hello world", 1, 2, 3))
 
 
 # may need context
-from hmap.interfaces import ILoc, IBatteryLevel, IZmq
+from hmap.capabilities import Loc, BatteryLevel, Zmq
 
-class MyContext(ILoc, IBatteryLevel, IZmq)
+class MyCapabilitiy(ILoc, IBatteryLevel, IZmq)
     pass # you may need to define initial locations for some of you
 
 ctx = MyContext(loc=(1, 2))

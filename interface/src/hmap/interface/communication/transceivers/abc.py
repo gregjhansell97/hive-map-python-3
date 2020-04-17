@@ -28,7 +28,7 @@ class Transceiver(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def receive(self, timeout=None):
+    def recv(self, timeout=None):
         """Receives data from another transceiver, blocks for duration of
         timeout. If timeout is set to None, then blocks indefinitely
 
@@ -52,24 +52,20 @@ class Transceiver(ABC):
         """
         pass
     @property
-    @abstractmethod
-    def receive_strength(self):
+    def recv_strength(self):
         """Number between 0 and 1, a higher number indicates better message
         transmission detection"""
-        raise NotImplementedError
-    @receive_strength.setter
-    @abstractmethod
-    def set_receive_strength(self, rcv_range):
-        raise NotImplementedError
+        return 1
+    @recv_strength.setter
+    def set_recv_strength(self, rcv_strength):
+        raise AttributeError
     @property
-    @abstractmethod
     def transmit_strength(self):
         """Number between 0 and 1, a higher number indicates a more robust
         signal that is likely to reach more transceivers"""
-        raise NotImplementedError
-    @transmit_range.setter
-    @abstractmethod
+        return 1
+    @transmit_strength.setter
     def set_transmit_strength(self, tr_range):
-        raise NotImplementedError
+        raise AttributeError
 
 # TODO write a base class for packing a message

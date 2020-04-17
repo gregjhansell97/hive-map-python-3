@@ -11,6 +11,9 @@ source =
 
 [report]
 # Regexes for lines to exclude from consideration
+omit = 
+    */interface/src/hmap/interface/*
+    */stdlib/src/hmap/std/*
 exclude_lines =
     # Have to re-enable the standard pragma
     pragma: no cover

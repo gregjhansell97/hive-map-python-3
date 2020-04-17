@@ -3,6 +3,7 @@
 
 from abc import ABC, abstractmethod
 
+from hmap.interface import asserts
 from hmap.interface.testing import HMapFixture, test_method
 from hmap.interface.matching.abc import Event, Interest, Subscription, Matcher
 
@@ -55,7 +56,7 @@ class MatchingFixture(HMapFixture):
         # ensure serialization changes set reference
         for e in events:
             # TODO serialization equivalence for a class
-            assert e != deserialize(serialize(e))
+            asserts.not_equal(e, deserialize(serialize(e)))
     @test_method
     def interest_serialization_properties(self):
         interests = self.interests(10)
@@ -64,8 +65,8 @@ class MatchingFixture(HMapFixture):
         # general serialization testing
         # ensure serialization changes set reference
         for i in interests:
-            assert i == i
-            assert i == deserialize(serialize(i))
+            asserts.equal(i, i)
+            asserts.not_equal(i, deserialize(serialize(i)))
     @test_method
     def interest_map_matching(self):
         interest, disinterest = self.interests(2)
@@ -75,7 +76,7 @@ class MatchingFixture(HMapFixture):
         imap.add(disinterest, 2) # adding value
 
         # get all interests that would match event
-        assert set([1]) == set(imap.match(event))
+        asserts.equal(set([1]), set(imap.match(event)))
     
         # interest back isn't necessarily compatable but should end with 
         # same result
@@ -87,7 +88,7 @@ class MatchingFixture(HMapFixture):
         imap.add(disinterest, 2)
         imap.add(interest, 3)
         # get all values that would match event
-        assert set([1, 3]) == set(list(imap.match(event)))
+        asserts.equal(set([1, 3]), set(list(imap.match(event))))
     @test_method
     def interest_map_properties(self):
         def different(m1, m2):
@@ -95,15 +96,15 @@ class MatchingFixture(HMapFixture):
         I = self.matcher.Interest
         interests = self.interests(10)
         # interests must be unique (quick sanity check
-        assert len(set(interests)) == len(interests)
+        asserts.equal(len(set(interests)), len(interests))
         # partition interests
         interests1 = interests[::2]
         interests2 = interests[1::2]
         map1 = I.Map()
         map2 = I.Map()
         # confirm both are empty
-        assert len({i for i in map1.interests}) == 0
-        assert len({i for i in map2.interests}) == 0
+        asserts.equal(len({i for i in map1.interests}), 0)
+        asserts.equal(len({i for i in map2.interests}), 0)
         # check to make sure different
         assert different(map1, map2)
         # add the same items to both maps
@@ -159,9 +160,9 @@ class MatchingFixture(HMapFixture):
         Subscription = self.matcher.Subscription
         matchers = self.matchers(5)
         for m in matchers:
-            assert m == m
+            asserts.equal(m, m)
             assert not m != m
-        assert set((m.Interest for m in matchers)) == {Interest}
-        assert set((m.Interest.Map for m in matchers)) == {Interest.Map}
-        assert set((m.Event for m in matchers)) == {Event}
-        assert set((m.Subscription for m in matchers)) == {Subscription}
+        asserts.equal(set((m.Interest for m in matchers)), {Interest})
+        asserts.equal(set((m.Interest.Map for m in matchers)), {Interest.Map})
+        asserts.equal(set((m.Event for m in matchers)), {Event})
+        asserts.equal(set((m.Subscription for m in matchers)), {Subscription})

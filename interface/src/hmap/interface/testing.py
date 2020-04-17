@@ -19,19 +19,19 @@ class HMapFixture(ABC):
         """Returns n instances of classes being tested"""
         raise NotImplementedError
 
-def interface_test(fixture):
+def assert_interface(fixture):
     assert issubclass(type(fixture), HMapFixture)
     # check if it has capabilities
     # test for capability
 
     # go through hierarchy of fixtures and test functions
+
+    tests = set()
     for F in type(fixture).mro()[::-1]:
         if issubclass(F, HMapFixture):
             members = [getattr(F, m) for m in dir(F)]
             functions = [m for m in members if callable(m)]
-            tests = [f for f in functions if hasattr(f, "_hmap__test")]
-            for t in tests:
-                fixture.logger.info(f"testing: {t.__name__}")
-                t(fixture)
-                fixture.logger.info(f"success: {t.__name__}")
+            tests.update([f for f in functions if hasattr(f, "_hmap__test")])
+    for t in tests:
+        t(fixture)
 
