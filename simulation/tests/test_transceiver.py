@@ -5,10 +5,7 @@ import logging
 import pytest
 import uuid
 
-# interface
-from hmap.interface.testing import assert_interface
-#TODO shorten
-from hmap.interface.communication.transceivers.fixtures import FTransceiver
+from hmap.interface.communication.fixtures import FTransceiver
 # simulation library
 from hmap.sim.communication.transceivers import ConnectableTransceiver
 
@@ -29,5 +26,5 @@ class FConnectableTransceiver(FTransceiver):
 
 def test_connected_transceiver():
     trx_fixture = FConnectableTransceiver()
-    assert_interface(trx_fixture)
+    trx_fixture.test()
 

@@ -3,7 +3,7 @@
 
 from abc import ABC, abstractmethod
 
-from hmap.matching import Matcher
+from hmap.interface.matching import Matcher
 
 class Router(ABC):
     """The router is responsible for delivering events published locally to 
@@ -25,23 +25,10 @@ class Router(ABC):
         self.__Sub = matcher.Subscription
         self.__matcher = matcher
         # private helpers 
-        self.__active = None
         self.__matcher = matcher
         self.__local_subs = self.__Interest.Map()
         # TODO add to a list of weak-references of routers that
-        # get stopped at the end if not already garbage collected
-    def __enter__(self):
-        self.start()
-    def __exit__(self, *args):
-        if any(a is not None for a in args):
-            # exception found
-            self.stop()
-            return False # do not surpress exception
-    @property
-    def active(self):
-        """Whether or not the router has been started"""
-        return self.__active is not None and self.__active
-
+        # get stopped at the end if not already garbage collected!
     @property
     def local_interests(self):
         """List of interests of local subscriptions"""
@@ -53,17 +40,12 @@ class Router(ABC):
     def publish(self, *args, **kwargs):
         """Creates an event from the arguments specified, notifies all local
         subscriptions and the routing algorithm
-
-        Raises:
-            (TypeError): invocation when inactive
         """
-        if not self.active:
-            raise TypeError("router is not active")
         e = self.__Event(*args, **kwargs)
         # notify subscriptions
         self.notify_subscriptions(e)
         # notify router
-        self.nofity_router(e)
+        self.notify_router(e)
     def subscribe(self, *args, **kwargs):
         """Creates a new subscription from arguments specified: the subscription
         created is notified when an event matches their criteria.
@@ -74,8 +56,6 @@ class Router(ABC):
         Raises:
             (TypeError): invocation when inactive
         """
-        if not self.active:
-            raise TypeError("router is not active")
         s = self.__Sub(*args, **kwargs)
         self.__local_subs.add(s.interest, s)
     def unsubscribe(self, token):
@@ -93,30 +73,18 @@ class Router(ABC):
     def notify_subscriptions(self, event):
         """Notifies all local subscriptions of an event"""
         # TODO executor
-        for s in self.__local_subs.match(e):
-            s.notify(e)
+        for s in self.__local_subs.match(event):
+            s.notify(event)
     @abstractmethod
     def notify_router(self, event):
         """Notifies implementation of router of a locally published event. Must
         be overriden for specific behavior
         """
         raise NotImplementedError
-    @abstractmethod
-    def start(self):
-        """Idempotent method that starts the router and makes it active. Must
-        invoke super-constructor if overridden
-        
-        Raises:
-            (TypeError): invocation after invoking stoping
-        """
-        if not self.__active:
-            raise TypeError
-        self.__active = True
-    @abstractmethod
-    def stop(self):
+    def close(self):
         """Idempotent method that stops the router, all behavior after, except for
         invoking stop again, is undefined"""
-        self.__active = False
-    def is_valid_matching(self, matcher):
+        pass
+    def is_valid_matcher(self, matcher):
         """Determines if matching algorithm can be used in routing protocol"""
-        return issubclass(matcher.__class__, Matcher):
+        return issubclass(matcher.__class__, Matcher)

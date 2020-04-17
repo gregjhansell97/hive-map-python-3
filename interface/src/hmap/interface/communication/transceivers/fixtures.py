@@ -5,10 +5,9 @@ from abc import ABC, abstractmethod
 import time
 
 from hmap.interface import asserts
-from hmap.interface.testing import HMapFixture, test_method
-from hmap.interface.matching.abc import Event, Interest, Subscription, Matcher
+from hmap.interface.fixtures import FHMap, fixture_test
 
-class FTransceiver(HMapFixture):
+class FTransceiver(FHMap):
     @property
     def timeout(self): 
         return 0.3
@@ -26,7 +25,7 @@ class FTransceiver(HMapFixture):
         """n Transceiver instances not in communication with one another"""
         raise NotImplementedError
 
-    #@test_method
+    @fixture_test
     def proper_close_operation(self):
         for t in self.instances:
             # for statement checks idempotency
@@ -38,8 +37,7 @@ class FTransceiver(HMapFixture):
                     pass
                 else:
                     raise AssertionError
-
-    @test_method
+    @fixture_test
     def connected_transmit_recv(self):
         transceivers = self.connected_transceivers(4)
         try:
@@ -55,7 +53,7 @@ class FTransceiver(HMapFixture):
         # close up shop:
         
 
-    @test_method 
+    @fixture_test
     def isolated_transmit_recv(self):
         try:
             transceivers = self.isolated_transceivers(4)

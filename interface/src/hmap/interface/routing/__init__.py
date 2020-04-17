@@ -5,6 +5,6 @@
 # TODO discuss responsibilities
 # TODO provide some examples
 
-from hmap.routing.router import Router
+from hmap.interface.routing.router import Router
 
 __all__ = ["Router"]

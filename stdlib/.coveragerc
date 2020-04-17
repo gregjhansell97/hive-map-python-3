@@ -2,6 +2,7 @@
 [run]
 branch = True
 source = std
+concurrency = "multiprocessing"
 # omit = bad_file.py
 
 [paths]

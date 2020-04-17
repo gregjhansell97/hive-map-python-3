@@ -80,7 +80,7 @@ class IPCTransceiver(ABCTransceiver):
         self.__server_lock = Lock()
         self.__server = self.__get_server()
         # registers ctrl-c and exit
-        atexit.register(self.close) # TODO add to super class 
+        #atexit.register(self.close) # TODO add to super class 
     def __get_server(self):
         address = self.__address
         # start-up the session

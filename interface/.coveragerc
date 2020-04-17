@@ -2,6 +2,7 @@
 [run]
 branch = True
 source = interface
+concurrency="multiprocessing"
 # omit = bad_file.py
 
 [paths]
@@ -11,6 +12,9 @@ source =
 
 [report]
 # Regexes for lines to exclude from consideration
+omit = 
+    */simulation/src/hmap/sim/*
+    */stdlib/src/hmap/std/*
 exclude_lines =
     # Have to re-enable the standard pragma
     pragma: no cover

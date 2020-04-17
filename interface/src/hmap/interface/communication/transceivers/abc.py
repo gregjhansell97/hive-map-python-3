@@ -4,13 +4,20 @@
 """Abstract base classes for transceivers"""
 
 from abc import ABC, abstractmethod
+import atexit
 import math
+import weakref
 
 
 class Transceiver(ABC):
     """Abstract base class for all transceivers. Transceivers transmit and
     receive data from neighboring transceivers.
     """
+    __instances = []
+    def __init__(self):
+        Transceiver.__instances.append(weakref.ref(self))
+    def __del__(self): 
+        self.close()
 
     @abstractmethod
     def transmit(self, data, timeout=None):
@@ -68,4 +75,9 @@ class Transceiver(ABC):
     def set_transmit_strength(self, tr_range):
         raise AttributeError
 
+    @atexit.register
+    def __clean_up():
+        transceivers = [t() for t in Transceiver.__instances if t() is not None]
+        for t in transceivers:
+            t.close()
 # TODO write a base class for packing a message

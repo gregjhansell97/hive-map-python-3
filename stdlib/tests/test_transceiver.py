@@ -7,10 +7,8 @@ import uuid
 
 import time
 
-# interface
-from hmap.interface.testing import assert_interface
-#TODO shorten
-from hmap.interface.communication.transceivers.fixtures import FTransceiver
+#interface
+from hmap.interface.communication.fixtures import FTransceiver
 # standard library
 from hmap.std.communication.transceivers import IPCTransceiver
 
@@ -35,5 +33,5 @@ class FIPCTransceiver(FTransceiver):
 
 def test_ipc_transceiver():
     trx_fixture = FIPCTransceiver()
-    assert_interface(trx_fixture)
+    trx_fixture.test()
 

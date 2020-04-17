@@ -4,22 +4,26 @@
 from abc import ABC, abstractmethod
 
 from hmap.interface import asserts
-from hmap.interface.testing import HMapFixture, test_method
+from hmap.interface.fixtures import FHMap, fixture_test
 from hmap.interface.matching.abc import Event, Interest, Subscription, Matcher
 
-class MatchingFixture(HMapFixture):
+class FMatching(FHMap):
     @property
     def instances(self):
-        instances = self.matchers(1)
-        instances += self.interests(1)
-        instances += self.subscriptions(1)
-        instances += self.event(1)
+        instances = self.matchers(3)
+        instances += self.interests(5)
+        instances += self.subscriptions(5)
+        instances += self.event(5)
         return instances
     @property
-    def matcher(self):
-        """Matching algorithm used"""
-        return self.matchers(1)[0]
-
+    def Event(self):
+        return self.matchers(1)[0].Event
+    @property
+    def Interest(self):
+        return self.matchers(1)[0].Interest
+    @property
+    def Subscription(self):
+        return self.matchers(1)[0].Subscription
     @abstractmethod
     def matchers(self, n):
         """List of n matchers of same matching algorithm"""
@@ -47,9 +51,9 @@ class MatchingFixture(HMapFixture):
         """List of n Event instances irrelevant to a given interest"""
         raise NotImplementedError
 
-    @test_method
+    @fixture_test
     def event_serialization_properties(self):
-        E = self.matcher.Event
+        E = self.Event
         events = self.events(10)
         serialize = E.serialize
         deserialize = E.deserialize
@@ -57,21 +61,21 @@ class MatchingFixture(HMapFixture):
         for e in events:
             # TODO serialization equivalence for a class
             asserts.not_equal(e, deserialize(serialize(e)))
-    @test_method
+    @fixture_test
     def interest_serialization_properties(self):
         interests = self.interests(10)
-        serialize = self.matcher.Interest.serialize
-        deserialize = self.matcher.Interest.deserialize
+        serialize = self.Interest.serialize
+        deserialize = self.Interest.deserialize
         # general serialization testing
         # ensure serialization changes set reference
         for i in interests:
             asserts.equal(i, i)
             asserts.not_equal(i, deserialize(serialize(i)))
-    @test_method
+    @fixture_test
     def interest_map_matching(self):
         interest, disinterest = self.interests(2)
         event = self.relevant_events(1, interest)[0]
-        imap = self.matcher.Interest.Map()
+        imap = self.Interest.Map()
         imap.add(interest, 1) # adding value
         imap.add(disinterest, 2) # adding value
 
@@ -89,11 +93,11 @@ class MatchingFixture(HMapFixture):
         imap.add(interest, 3)
         # get all values that would match event
         asserts.equal(set([1, 3]), set(list(imap.match(event))))
-    @test_method
+    @fixture_test
     def interest_map_properties(self):
         def different(m1, m2):
             return (m1 is not m2) and (not m1 == m2) and (m1 != m2)
-        I = self.matcher.Interest
+        I = self.Interest
         interests = self.interests(10)
         # interests must be unique (quick sanity check
         asserts.equal(len(set(interests)), len(interests))
@@ -153,11 +157,11 @@ class MatchingFixture(HMapFixture):
         else:
             assert False
 
-    @test_method
+    @fixture_test
     def matcher_properties(self):
-        Interest = self.matcher.Interest
-        Event = self.matcher.Event
-        Subscription = self.matcher.Subscription
+        Interest = self.Interest
+        Event = self.Event
+        Subscription = self.Subscription
         matchers = self.matchers(5)
         for m in matchers:
             asserts.equal(m, m)
