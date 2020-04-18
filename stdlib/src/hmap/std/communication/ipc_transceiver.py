@@ -4,10 +4,11 @@
 import atexit
 from multiprocessing import Pipe, Process
 from multiprocessing.connection import Client, Listener, wait
+import select
 from threading import Thread, Lock
 import time
 
-from hmap.interface.communication import Transceiver as ABCTransceiver
+from hmap.interface.communication import Communicator
 
 
 def session(address, trx):
@@ -65,7 +66,7 @@ def session(address, trx):
                     Thread(target=manage_client, args=[c], daemon=True))
             threads[-1].start()
 
-class IPCTransceiver(ABCTransceiver):
+class IPCTransceiver(Communicator):
     def __repr__(self):
         return f"IPCTransceiver({self.__address})"
     def __init__(self, name=None, address=None):
@@ -98,10 +99,11 @@ class IPCTransceiver(ABCTransceiver):
         # create client called server b/c server is being accessed
         return Client(address, family="AF_UNIX")
     def close(self): 
+        if not self.__close_flag.poll():
+            self.__close_trigger.send(b"1")
         with self.__server_lock:
-            self.__close_trigger.close()
             self.__server.close()
-    def transmit(self, data, timeout=None):
+    def send(self, data, timeout=None):
         self.__server.send_bytes(data)
     def recv(self, timeout=None):
         if self.__close_flag.poll():
@@ -112,6 +114,7 @@ class IPCTransceiver(ABCTransceiver):
                         [self.__server, self.__close_flag],
                         timeout=timeout)
             except OSError: # socket is closed, done reading
+                print(self.__close_flag.poll())
                 raise EOFError
             if self.__close_flag in responses:
                 raise EOFError # end of session, self.close invoked
@@ -128,3 +131,8 @@ class IPCTransceiver(ABCTransceiver):
                     self.__server = self.__get_server()
             else:
                 return data
+    def send_filenos(self):
+        return ([self.__close_flag], [self.__server.fileno()], [])
+    def recv_filenos(self):
+        return ([self.__close_flag, self.__server.fileno()], [], [])
+

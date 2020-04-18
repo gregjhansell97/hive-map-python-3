@@ -8,4 +8,7 @@
     https://pytest.org/latest/plugins.html
 """
 
+import time
 
+def pytest_report_collectionfinish(*args, **kwargs):
+    time.sleep(1)

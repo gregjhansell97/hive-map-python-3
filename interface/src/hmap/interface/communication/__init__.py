@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from hmap.interface.communication.transceivers import Transceiver
+from hmap.interface.communication.communicator import Communicator
 
-__all__ = ["Transceiver"]
+__all__ = ["Communicator"]

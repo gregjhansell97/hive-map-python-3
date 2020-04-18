@@ -3,6 +3,7 @@
 branch = True
 source = std
 concurrency = "multiprocessing"
+timid = True
 # omit = bad_file.py
 
 [paths]

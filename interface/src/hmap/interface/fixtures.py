@@ -4,6 +4,8 @@
 from abc import ABC, abstractmethod
 import logging
 
+import time
+
 class FHMap(ABC):
     """Base fixture for all hive-map fixtures. Each fixture tests classes and
     their interactions in an inheritable environment.

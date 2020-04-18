@@ -2,23 +2,24 @@
 # -*- coding: utf-8 -*-
 
 from uuid import uuid4
+import random
 from hmap.interface.routing import Router
 
 class GossipRouter(Router):
     def __init__(
             *args, 
             transceivers=[], 
-            uid=uuid4(), 
             stale_buffer_size=1000, 
             **kwargs):
         super().__init__(*args, **kwargs)
-        self._trxs = transceivers
-        self._timestamp = 0
+        self.__trxs = transceivers
     def close(self):
-        for t in self._trxs:
+        for t in self.__trxs:
             t.close()
     def notify_router(self, event):
-        serialize = type(event).serialize
+        serialize = self.Event.serialize
         raw_event = serialize(event)
-        msg_id = uid + struct.pack("I", self._timestamp)
-        pass
+        msg_id = struct.pack("I", random.getrandbits(32))
+        msg = msg_id + raw_event
+        for t in self.__trxs:
+            t.transmit(msg)
