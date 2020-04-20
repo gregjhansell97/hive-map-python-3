@@ -4,7 +4,7 @@
 import pytest
 
 # from interface
-from hmap.interface.matching.topic_based.fixtures import FTopicBasedMatching
+from hmap.testing.matching.topic_based.fixtures import FTopicBasedMatching
 from hmap.std.matching.topic_based import Matcher
 from hmap.std.matching.topic_based.msg_types import PyObj
 

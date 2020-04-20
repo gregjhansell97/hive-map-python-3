@@ -25,7 +25,15 @@ class FHMap(ABC):
         for t in tests:
             t(self)
 def fixture_test(m):
-    m._hmap__test = True
-    return m
+    def ftest(*args, **kwargs):
+        try:
+            m(*args, **kwargs)
+        except:
+            FHMap.logger.error(f"{m.__qualname__} Failed :(")
+            raise
+        else:
+            FHMap.logger.info(f"{m.__qualname__} Passed :)")
+    ftest._hmap__test = True
+    return ftest
 
 __all__ = ["fixture_test", "FHMap"]

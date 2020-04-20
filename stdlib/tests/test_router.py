@@ -8,7 +8,7 @@ import uuid
 import time
 
 #interface
-from hmap.interface.routing.fixtures import FRouter
+from hmap.testing.routing.fixtures import FRouter
 # standard library
 from hmap.std.routing import LocalRouter
 from hmap.std.matching import topic_based

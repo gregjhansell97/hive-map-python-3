@@ -1,9 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = std
-concurrency = "multiprocessing"
-timid = True
+source = testing
 # omit = bad_file.py
 
 [paths]
@@ -13,10 +11,6 @@ source =
 
 [report]
 # Regexes for lines to exclude from consideration
-omit = 
-    */interface/src/hmap/interface/*
-    */simulation/src/hmap/sim/*
-    */testing/src/hmap/testing/*
 exclude_lines =
     # Have to re-enable the standard pragma
     pragma: no cover

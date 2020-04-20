@@ -34,10 +34,13 @@ class Communicator(ABC):
             - if past timeout and couldn't send information
         """
         raise NotImplementedError
-    def poll_send(self, data, timeout=None):
+    def poll_send(self, data, timeout=0):
         """Returns True if communicator can send information at that time or the
         communicator has been closed"""
-        return select.select(*self.send_filenos(), timeout) != ([], [], [])
+        try:
+            return select.select(*self.send_filenos(), timeout) != ([], [], [])
+        except(OSError, EOFError):
+            return True
 
     @abstractmethod
     def recv(self, timeout=None):
@@ -56,10 +59,13 @@ class Communicator(ABC):
             - if passed timeout and didn't receive any bytes
         """
         raise NotImplementedError
-    def poll_recv(self, timeout=None):
+    def poll_recv(self, timeout=0):
         """Returns True if communicator can receive information at that time or
         the communicator has been closed"""
-        return select.select(*self.recv_filenos, timeout) != ([], [], [])
+        try:
+            return select.select(*self.recv_filenos(), timeout) != ([], [], [])
+        except(OSError, EOFError):
+            return True
 
     @abstractmethod
     def close(self):
@@ -94,7 +100,7 @@ class Communicator(ABC):
         for c in comms:
             c.close()
 
-def poll(communicators, timeout=None):
+def poll(communicators, timeout=0):
     send_table = {}
     recv_table = {}
 
@@ -102,8 +108,11 @@ def poll(communicators, timeout=None):
     read_fds = []
     # make a reverse dictionary of filenos to communicators
     for c in communicators:
-        send_r, send_w = c.send_filenos()
-        recv_r, recv_w = c.recv_filenos()
+        try:
+            send_r, send_w, send_x = c.send_filenos()
+            recv_r, recv_w, send_x = c.recv_filenos()
+        except(OSError, EOFError):
+            return True
         read_fds.extend(send_r + recv_r)
         write_fds.extend(send_w + recv_w)
         for fd in send_r + send_w:
@@ -111,45 +120,69 @@ def poll(communicators, timeout=None):
         for fd in recv_r + recv_w:
             recv_table[fd] = c
     # select file descriptors
-    fds_r, fds_w, fds_x = select.select(read_fds, write_fds, [], timeout)
+    try:
+        fds_r, fds_w, fds_x = select.select(read_fds, write_fds, [], timeout)
+    except(OSError, EOFError):
+        return True
     # extract communicators from communication table
     fds = fds_r + fds_w + fds_x
-    return (
-            list({recv_table[fd] for fd in fds}), 
-            list({send_table[fd] for fd in fds}))
+    recv_comms = set()
+    send_comms = set()
+    for fd in fds:
+        try:
+            recv_comms.add(recv_table[fd])
+        except KeyError: # not in recv_table
+            pass
+        try:
+            send_comms.add(send_table[fd])
+        except KeyError:
+            pass
+    return (list(recv_comms), list(send_comms))
 
-def poll_send(communicators, timeout=None):
+def poll_send(communicators, timeout=0):
     send_table = {}
 
     write_fds = []
     read_fds = []
     # make a reverse dictionary of filenos to communicators
     for c in communicators:
-        send_r, send_w = c.send_filenos()
+        try:
+            send_r, send_w, send_x = c.send_filenos()
+        except(OSError, EOFError):
+            return True
         read_fds.extend(send_r)
         write_fds.extend(send_w)
         for fd in send_r + send_w:
             send_table[fd] = c
     # select file descriptors
-    fds_r, fds_w, fds_x = select.select(read_fds, write_fds, [], timeout)
+    try:
+        fds_r, fds_w, fds_x = select.select(read_fds, write_fds, [], timeout)
+    except(OSError, EOFError):
+        return True
     # extract communicators from communication table
     fds = fds_r + fds_w + fds_x
     return list({send_table[fd] for fd in fds})
 
-def poll_recv(communicators, timeout=None):
+def poll_recv(communicators, timeout=0):
     recv_table = {}
 
     write_fds = []
     read_fds = []
     # make a reverse dictionary of filenos to communicators
     for c in communicators:
-        recv_r, recv_w = c.recv_filenos()
+        try:
+            recv_r, recv_w, recv_x = c.recv_filenos()
+        except(OSError, EOFError):
+            return True
         read_fds.extend(recv_r)
         write_fds.extend(recv_w)
         for fd in recv_r + recv_w:
             recv_table[fd] = c
     # select file descriptors
-    fds_r, fds_w, fds_x = select.select(read_fds, write_fds, [], timeout)
+    try:
+        fds_r, fds_w, fds_x = select.select(read_fds, write_fds, [], timeout)
+    except(OSError, EOFError):
+        return True
     # extract communicators from communication table
     fds = fds_r + fds_w + fds_x
     return list({recv_table[fd] for fd in fds}) 

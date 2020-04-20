@@ -12,20 +12,16 @@ from hmap.interface.communication import Communicator
 
 
 def session(address, trx):
-    try:
-        connections = [] # list of connections
-        threads = []
-        listener = None
-        session.stop = False
-        session.lock = Lock()
-    except:
-        trx.send_bytes(b"0")
-        raise
+    connections = [] # list of connections
+    threads = []
+    listener = None
+    session.stop = False
+    session.lock = Lock()
     def manage_client(client):
         while True:
             try:
                 data = client.recv_bytes()
-            except EOFError:
+            except(EOFError, ConnectionResetError):
                 with session.lock:
                     connections.remove(client)
                     client.close()
@@ -33,9 +29,8 @@ def session(address, trx):
                     session.stop = True
                     try:
                         poison_client = Client(address, family="AF_UNIX")
-                    except ConnectionRefusedError: # process dieing
-                        pass
-                    except FileNotFoundError: #process already dead
+                    except(ConnectionRefusedError, FileNotFoundError): 
+                        # process dieing or already dead
                         pass
                 return # exit the thread
             with session.lock:
@@ -99,38 +94,39 @@ class IPCTransceiver(Communicator):
         # create client called server b/c server is being accessed
         return Client(address, family="AF_UNIX")
     def close(self): 
-        if not self.__close_flag.poll():
-            self.__close_trigger.send(b"1")
+        if self.__close_flag.poll():
+            return
+        self.__close_trigger.send(b"1")
         with self.__server_lock:
             self.__server.close()
     def send(self, data, timeout=None):
-        self.__server.send_bytes(data)
+        try:
+            self.__server.send_bytes(data)
+        except(OSError, AttributeError): # file is closed
+            raise EOFError
     def recv(self, timeout=None):
         if self.__close_flag.poll():
             raise EOFError
         while True:
-            try:
+            with self.__server_lock:
                 responses = wait(
                         [self.__server, self.__close_flag],
                         timeout=timeout)
-            except OSError: # socket is closed, done reading
-                print(self.__close_flag.poll())
-                raise EOFError
-            if self.__close_flag in responses:
-                raise EOFError # end of session, self.close invoked
-            if len(responses) == 0:
-                return b""
-            try:
-                data = self.__server.recv_bytes()
-            except EOFError:
-                # file was closed attempt to recover the server
-                with self.__server_lock:
-                    if self.__close_flag.poll():
-                        # self is closing
-                        return
-                    self.__server = self.__get_server()
-            else:
-                return data
+                if self.__close_flag in responses:
+                    raise EOFError # end of session, self.close invoked
+                if len(responses) == 0: 
+                    # timeout occurred
+                    return b""
+                try:
+                    data = self.__server.recv_bytes()
+                except EOFError:
+                    # file was closed attempt to recover the server
+                        if self.__close_flag.poll():
+                            # self is closing, no use recovering server
+                            raise EOFError
+                        self.__server = self.__get_server()
+                else:
+                    return data
     def send_filenos(self):
         return ([self.__close_flag], [self.__server.fileno()], [])
     def recv_filenos(self):

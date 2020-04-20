@@ -5,26 +5,28 @@ import logging
 import pytest
 import uuid
 
-from hmap.interface.communication.fixtures import FTransceiver
+from hmap.testing.communication.fixtures import FCommunicator
 # simulation library
-from hmap.sim.communication.transceivers import ConnectableTransceiver
+from hmap.sim.communication import LocalCommunicator
 
 _logger = logging.getLogger(f"__name__")
 
 
-class FConnectableTransceiver(FTransceiver):
-    def connected_transceivers(self, n):
-        transceivers = self.isolated_transceivers(n)
-        for t1 in transceivers:
-            for t2 in transceivers:
-                if t1 is t2:
+class FLocalCommunicator(FCommunicator):
+    def connected(self):
+        comms = self.isolated(5)
+        for c1 in comms:
+            for c2 in comms:
+                if c1 is c2:
                     continue
-                t1.connect(t2)
-        return transceivers
-    def isolated_transceivers(self, n):
-        return [ConnectableTransceiver() for _ in range(n)]
+                c1.connect(c2)
+                c2.connect(c1)
+        return comms
+    def isolated(self, n):
+        return [LocalCommunicator() for _ in range(n)]
 
-def test_connected_transceiver():
-    trx_fixture = FConnectableTransceiver()
-    trx_fixture.test()
+def test_local_communicator(caplog):
+    caplog.set_level(logging.INFO)
+    comm_fixture = FLocalCommunicator()
+    comm_fixture.test()
 
