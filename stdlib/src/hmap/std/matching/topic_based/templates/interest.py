@@ -23,6 +23,14 @@ class Interest(BaseInterest):
         for t in self.__topics:
             size += t.calcsize()
         return size
+    def serially_equal(self, i):
+        outcome = list(self.__topics)
+        for t in i.__topics:
+            try:
+                outcome.remove(t)
+            except ValueError:
+                return False
+        return outcome == []
     @classmethod
     def serialize(cls, interest):
         data = struct.pack("I", len(interest.__topics))

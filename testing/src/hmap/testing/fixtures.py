@@ -4,6 +4,8 @@
 from abc import ABC, abstractmethod
 import logging
 
+import traceback
+
 class FHMap(ABC):
     """Base fixture for all hive-map fixtures. Each fixture tests classes and
     their interactions in an inheritable environment.
@@ -28,9 +30,12 @@ def fixture_test(m):
     def ftest(*args, **kwargs):
         try:
             m(*args, **kwargs)
-        except:
+        except Exception as e:
             FHMap.logger.error(f"{m.__qualname__} Failed :(")
-            raise
+            #statements = traceback.format_stack()
+            #for s in statements: 
+            #    FHMap.logger.error(s.strip())
+            raise e
         else:
             FHMap.logger.info(f"{m.__qualname__} Passed :)")
     ftest._hmap__test = True

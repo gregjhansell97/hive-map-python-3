@@ -18,6 +18,7 @@ class FlatNumber(HashableTopic):
     def content(self):
         return self.__content
 
+
     def calcsize(self):
         return struct.calcsize(self.fmt)
 

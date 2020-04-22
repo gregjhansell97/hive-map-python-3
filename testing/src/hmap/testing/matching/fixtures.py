@@ -5,15 +5,20 @@ from abc import ABC, abstractmethod
 
 from hmap.testing import asserts
 from hmap.testing.fixtures import FHMap, fixture_test
-#from hmap.interface.matching.abc import Event, Interest, Subscription, Matcher
+from hmap.testing.matching.traits.fixtures import FSerializable, FHashable
 
-class FMatching(FHMap):
+class FMatching(FSerializable):
     @property
     def instances(self):
         instances = self.matchers(3)
         instances += self.interests(5)
         instances += self.subscriptions(5)
         instances += self.event(5)
+        return instances
+    @property
+    def serializable_instances(self):
+        instances = self.interests(3) + self.interests(3)
+        instances += self.events(3) + self.events(3)
         return instances
     @property
     def Event(self):
@@ -24,31 +29,60 @@ class FMatching(FHMap):
     @property
     def Subscription(self):
         return self.matchers(1)[0].Subscription
-    @abstractmethod
-    def matchers(self, n):
-        """List of n matchers of same matching algorithm"""
-        raise NotImplementedError
-    @abstractmethod
     def interests(self, n):
         """List of n orthogonal Interest instances"""
-        raise NotImplementedError
-    @abstractmethod
+        return [
+                self.Interest(*args, **kwargs)
+                for args, kwargs in self.interest_args_kwargs(n)]
     def subscriptions(self, n):
         """List of n Subscription instances"""
-        raise NotImplementedError
+        return [
+                self.Subscription(*args, **kwargs)
+                for args, kwargs in self.subscription_args_kwargs(n)]
     def events(self, n):
         """List of n events"""
         events = []
         for i in self.interests(n):
             events += self.relevant_events(1, i)
         return events
-    @abstractmethod
     def relevant_events(self, n, i):
         """List of n Event instances relevant to given interest"""
-        raise NotImplementedError
-    @abstractmethod
+        return [
+                self.Event(*args, **kwargs)
+                for args, kwargs in self.relevant_event_args_kwargs(n, i)]
     def irrelevant_events(self, n, i):
         """List of n Event instances irrelevant to a given interest"""
+        return [
+                self.Event(*args, **kwargs)
+                for args, kwargs in self.irrelevant_event_args_kwargs(n, i)]
+
+    @abstractmethod
+    def matchers(self, n):
+        """List of n matchers of same matching algorithm"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def interest_args_kwargs(self, n):
+        """List of n 2-d tuples of constructor arguments for interest"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def subscription_args_kwargs(self, n):
+        """List of n 2-d tuples of constructor arguments for subscription"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def relevant_event_args_kwargs(self, n, i):
+        """List of n 2-d tuples of constructor arguments for events relevant to
+        a given interest
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def irrelevant_event_args_kwargs(self, n, i):
+        """List of n 2-d tuples of constructor arguemnts for events irrelevant to
+        a given interest
+        """
         raise NotImplementedError
 
     @fixture_test
@@ -61,6 +95,7 @@ class FMatching(FHMap):
         for e in events:
             # TODO serialization equivalence for a class
             asserts.not_equal(e, deserialize(serialize(e)))
+
     @fixture_test
     def interest_serialization_properties(self):
         interests = self.interests(10)
@@ -71,16 +106,21 @@ class FMatching(FHMap):
         for i in interests:
             asserts.equal(i, i)
             asserts.not_equal(i, deserialize(serialize(i)))
+
     @fixture_test
     def interest_map_matching(self):
-        interest, disinterest = self.interests(2)
+        interest, disinterest, nointerest = self.interests(3)
         event = self.relevant_events(1, interest)[0]
+        nointerest_event = self.relevant_events(1, nointerest)[0]
+
         imap = self.Interest.Map()
         imap.add(interest, 1) # adding value
         imap.add(disinterest, 2) # adding value
 
         # get all interests that would match event
         asserts.equal(set([1]), set(imap.match(event)))
+        # ensure that irrelevant doesn't trigger anything
+        asserts.equal(set(), set(imap.match(nointerest_event)))
     
         # interest back isn't necessarily compatable but should end with 
         # same result
@@ -93,6 +133,7 @@ class FMatching(FHMap):
         imap.add(interest, 3)
         # get all values that would match event
         asserts.equal(set([1, 3]), set(list(imap.match(event))))
+
     @fixture_test
     def interest_map_properties(self):
         def different(m1, m2):

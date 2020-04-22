@@ -9,3 +9,11 @@ except DistributionNotFound:
     __version__ = 'unknown'
 finally:
     del get_distribution, DistributionNotFound
+
+from hmap.interface.utils import has_traits
+from hmap.interface.communication import Communicator
+from hmap.interface.matching import Event, Subscription, Interest
+from hmap.interface.routing import Router
+
+__all__ = ["has_traits", "Communicator", "Event", "Subscription", 
+        "Interest", "Router"]

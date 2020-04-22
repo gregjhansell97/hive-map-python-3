@@ -3,7 +3,7 @@
 
 import traceback
 
-from hmap.interface.fixtures import FHMap 
+from hmap.testing.fixtures import FHMap 
 
 
 class raises:

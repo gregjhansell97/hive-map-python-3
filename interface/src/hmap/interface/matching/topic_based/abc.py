@@ -3,27 +3,34 @@
 
 from abc import abstractmethod
 
-from hmap.interface.interfaces import ISerialize, IHash
+from hmap.interface.matching.traits import Serializable, Hashable
 
-class Topic(ISerialize):
+class Topic(Serializable):
     def __repr__(self):
         return f"{type(self).__name__}({self.content})"
+
+    def serially_equal(self, t):
+        return self.content == t.content
 
     @property
     @abstractmethod
     def content(self):
         raise NotImplementedError
 
-class HashableTopic(Topic, IHash):
+class HashableTopic(Topic, Hashable):
     def __hash__(self):
         return hash(self.content)
     def __eq__(self, other):
         return self.content == other.content
 
 
-class Msg(ISerialize):
+class Msg(Serializable):
     def __repr__(self): 
         return f"{type(self).__name__}({self.content})"
+    
+    def serially_equal(self, t):
+        return self.content == t.content
+
     @property
     @abstractmethod
     def content(self):

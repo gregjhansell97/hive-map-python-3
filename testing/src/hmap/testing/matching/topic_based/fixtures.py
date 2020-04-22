@@ -12,43 +12,64 @@ class FTopicBasedMatching(FMatching):
     @property
     def instances(self):
         super().instances + topics(5) + messages(5)
+    @property
+    def Topic(self):
+        return self.Event.Topic
+    @property
+    def Msg(self):
+        return self.Event.Msg
     def get_callback(self):
         def cb(tcontent, mcontent):
             cb.log.append((tcontent, mcontent))
         cb.log = []
         return cb
 
-    def interests(self, n):
-        """List of n orthogonal Interest instances"""
-        topics = self.topics(n)
-        return [self.Interest([t]) for t in topics]
-    def subscriptions(self, n):
-        """List of n Subscription instances with callbacks from get_callback"""
-        topics = self.topics(n)
+    def interest_args_kwargs(self, n):
+        # args = [t]
+        # kargs = {}
+        return [(([t],), {}) for t in self.topics(n)]
+
+    def subscription_args_kwargs(self, n):
         return [
-                self.Subscription(t.content, self.get_callback())
-                for t in topics]
-    def relevant_events(self, n, i):
-        events = []
-        for m in self.msgs(n):
+                (args + (self.get_callback(),), {})
+                for args in self.topic_args(n)]
+
+    def relevant_event_args_kwargs(self, n, i):
+        event_args_kwargs = []
+        for margs in self.msg_args(n):
             t = random.choice(i.topics)
-            events.append(self.Event(t.content, m.content))
-        return events
-    def irrelevant_events(self, n, i):
-        events = []
+            event_args_kwargs.append(((t.content, margs), {}))
+        return event_args_kwargs
+
+    def irrelevant_event_args_kwargs(self, n, i):
+        event_args_kwargs = []
         topics = self.topics(n + len(i.topics))
         for t in i.topics:
             topics.remove(t)
-        topics = topics[:n]
+            topics = topics[:n]
         for t, m in zip(topics, self.msgs(n)):
-            events.append(self.Event(t.content, m.content))
-    @abstractmethod
+            event_args_kwargs.append(((t.content, m.content), {}))
+
     def topics(self, n):
         """List of n unique topics"""
-        raise NotImplementedError
-    @abstractmethod
+        return [
+                self.Topic(*args) 
+                for args in self.topic_args(n)]
+
     def msgs(self, n):
         """List of n unique messages"""
+        return [
+                self.Msg(*args)
+                for args in self.msg_args(n)]
+
+    @abstractmethod
+    def topic_args(self, n):
+        """List of tuples of constructor arguments for n unique topics"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def msg_args(self, n):
+        """List of tuples of constructor arguments for n unique messages"""
         raise NotImplementedError
 
     @fixture_test

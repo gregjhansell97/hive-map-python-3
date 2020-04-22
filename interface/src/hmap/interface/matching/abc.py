@@ -4,9 +4,9 @@
 from abc import ABC, abstractmethod
 import weakref
 
-from hmap.interface.interfaces import ISerialize
+from hmap.interface.matching.traits import Serializable, Equality
 
-class Interest(ISerialize):
+class Interest(Serializable):
     """Base class for an interest in the pub-sub system"""
     class Map:
         """Base class for a datastructure that maps interests to values""" 
@@ -28,7 +28,7 @@ class Interest(ISerialize):
             """Returns all values that interests match the event specified"""
             raise NotImplementedError
 
-class Event(ISerialize):
+class Event(Serializable):
     """Base class for Event creation in the pub-sub system"""
     pass
 

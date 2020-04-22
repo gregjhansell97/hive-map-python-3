@@ -9,10 +9,11 @@ import time
 
 #interface
 from hmap.testing.communication.fixtures import FCommunicator
+from hmap.testing.communication.traits.fixtures import FPollable
 # standard library
 from hmap.std.communication import IPCTransceiver
 
-class FIPCTransceiver(FCommunicator):
+class FIPCTransceiver(FCommunicator, FPollable):
     @property
     def timeout(self):
         return 0.1
@@ -24,7 +25,7 @@ class FIPCTransceiver(FCommunicator):
         t0.send(b"hello")
         # ensure all transceivers can communicate
         for t in trxs[1:]:
-            while not t.poll_recv(timeout=self.timeout):
+            while t.recv(timeout=self.timeout) == b"":
                 t0.send(b"hello")
         # drain t's of messages
         for t in trxs:

@@ -8,8 +8,6 @@ import time
 from hmap.testing import asserts
 from hmap.testing.fixtures import FHMap, fixture_test
 
-from hmap.interface.communication import poll, poll_recv, poll_send
-
 class FCommunicator(FHMap):
     @property
     def timeout(self): 
@@ -48,8 +46,7 @@ class FCommunicator(FHMap):
         comm1, *comms = self.connected()
         comm1.send(b"msg1")
         for c in comms:
-            assert c.poll_recv(timeout=self.timeout)
-            asserts.equal(c.recv(timeout=0), b"msg1")
+            asserts.equal(c.recv(timeout=self.timeout), b"msg1")
         # no more receives
         for c in [comm1] + comms:
             asserts.equal(c.recv(timeout=0), b"")
@@ -57,6 +54,36 @@ class FCommunicator(FHMap):
         comm1.send(b"done")
         for c in [comm1] + comms:
             c.close()
+
+    @fixture_test
+    def spam_send_recv(self):
+        comms = self.connected()
+        for c in comms:
+            c.send(b"msg")
+        for c in comms:
+            c.recv(timeout=0)
+
+    @fixture_test
+    def multi_threaded_spam_send_recv(self):
+        def spam_send_recv(comms):
+            # loop until comms are closed
+            while True:
+                for c in comms:
+                    try:
+                        c.send(b"msg")
+                    except EOFError:
+                        return
+        comms = self.connected()
+        t = Thread(target=spam_send_recv, args=(comms,))
+        t.start()
+        time.sleep(self.timeout)
+        for i in range(10):
+            for c in comms:
+                c.recv(timeout=0)
+        for c in comms: # turn thread off
+            c.close()
+        t.join()
+
 
     @fixture_test
     def isolated_send_recv(self):
@@ -68,27 +95,6 @@ class FCommunicator(FHMap):
             asserts.equal(c.recv(timeout=0), b"")
 
     @fixture_test
-    def pollable(self):
-        comms = self.connected()
-        asserts.true(poll_send(comms))
-        asserts.true(poll(comms))
-        comms[0].send(b"msg1")
-        asserts.true(poll_recv(comms, timeout=self.timeout))
-        asserts.true(poll(comms))
-        for c in comms:
-            if c is not comms[0]:
-                asserts.true(c.poll_recv())
-                asserts.equal(c.recv(timeout=0), b"msg1")
-            asserts.false(c.poll_recv())
-        # should be nothing left to poll
-        asserts.false(poll_recv(comms, timeout=self.timeout))
-        # close a comm, should get something
-        comms[0].close()
-        asserts.true(poll_recv(comms, timeout=self.timeout))
-        asserts.true(poll_send(comms, timeout=self.timeout))
-        asserts.true(poll(comms, timeout=self.timeout))
-
-    @fixture_test
     def partial_close_send_recv(self):
         comm1, comm2, *comms = self.connected()
         comm2.close()
@@ -96,8 +102,7 @@ class FCommunicator(FHMap):
         with asserts.raises(EOFError):
             comm2.recv(timeout=self.timeout)
         for c in comms:
-            asserts.true(c.poll_recv(timeout=self.timeout))
-            asserts.equal(c.recv(timeout=0), b"msg1")
+            asserts.equal(c.recv(timeout=self.timeout), b"msg1")
 
     @fixture_test
     def concurrent_close_and_recv(self):

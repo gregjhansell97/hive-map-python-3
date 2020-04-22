@@ -24,6 +24,10 @@ class Event(BaseEvent):
     def calcsize(self):
         return self.__topic.calcsize() + self.__msg.calcsize()
 
+    def serially_equal(self, e):
+        return (self.__topic.serially_equal(e.__topic) and 
+                self.__msg.serially_equal(e.__msg))
+
     @property
     def msg(self):
         return self.__msg

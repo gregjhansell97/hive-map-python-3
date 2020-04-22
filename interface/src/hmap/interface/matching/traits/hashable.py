@@ -7,9 +7,9 @@ hive-map to verify the capability of an object
 
 from abc import ABC, abstractmethod
 
-class IEquality(ABC):
+from hmap.interface.matching.traits.equality import Equality
+
+class Hashable(Equality):
     @abstractmethod
-    def __eq__(self, other):
+    def __hash__(self):
         raise NotImplementedError
-    def __ne__(self, other):
-        return not (self == other)

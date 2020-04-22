@@ -21,24 +21,28 @@ def session(address, trx):
         while True:
             try:
                 data = client.recv_bytes()
-            except(EOFError, ConnectionResetError):
+                with session.lock:
+                    for c in connections:
+                        if c is client:
+                            continue
+                        c.send_bytes(data)
+                # TODO PLOP IN WHAT's below
+            except(EOFError, ConnectionResetError, ConnectionRefusedError, 
+                    FileNotFoundError, BrokenPipeError, OSError):
+                # something went wrong with client, connection is broken beyond
+                # recovery
                 with session.lock:
                     connections.remove(client)
                     client.close()
-                    # no more connections, poison process
-                    session.stop = True
-                    try:
-                        poison_client = Client(address, family="AF_UNIX")
-                    except(ConnectionRefusedError, FileNotFoundError): 
-                        # process dieing or already dead
-                        pass
+                    if len(connections) == 0:
+                        # no more connections, poison process
+                        session.stop = True
+                        try:
+                            poison_client = Client(address, family="AF_UNIX")
+                        except(ConnectionRefusedError, FileNotFoundError): 
+                            # process dieing or already dead
+                            pass
                 return # exit the thread
-            with session.lock:
-                for c in connections:
-                    if c is client:
-                        # don't send a message back
-                        continue
-                    c.send_bytes(data)
     try:
         # gonna have problems with AF_UNIX on windows machines
         listener = Listener(address, family="AF_UNIX")
@@ -102,7 +106,7 @@ class IPCTransceiver(Communicator):
     def send(self, data, timeout=None):
         try:
             self.__server.send_bytes(data)
-        except(OSError, AttributeError): # file is closed
+        except(OSError, AttributeError, BrokenPipeError): # file is closed
             raise EOFError
     def recv(self, timeout=None):
         if self.__close_flag.poll():

@@ -3,7 +3,6 @@
 
 import pytest
 
-# from interface
 from hmap.testing.matching.topic_based.fixtures import FTopicBasedMatching
 from hmap.std.matching.topic_based import Matcher
 from hmap.std.matching.topic_based.msg_types import PyObj
@@ -19,15 +18,15 @@ class FFlatNumber(FTopicBasedMatching):
         self.topic_type = topic_type
     def matchers(self, n):
         return [Matcher(self.topic_type, "PyObj") for _ in range(n)]
-    def topics(self, n):
-        ts = []
+    def topic_args(self, n):
+        t_args = []
         for offset in range((n//2) + 1):
-            ts += [
-                    self.Event.Topic(self.max_t - offset), 
-                    self.Event.Topic(self.min_t + offset)]
-        return ts[:n]
-    def msgs(self, n):
-        return [PyObj(f"i") for i in range(n)]
+            t_args += [
+                    (self.max_t - offset,), 
+                    (self.min_t + offset,)]
+        return t_args[:n]
+    def msg_args(self, n):
+        return [(f"i",) for i in range(n)]
 
 @pytest.mark.parametrize("topic_type,min_t,max_t", [
         ("FlatByte", -128, 127),
@@ -36,9 +35,9 @@ class FFlatNumber(FTopicBasedMatching):
         ("FlatUInt", 0, 2**32 - 1)])
 def test_flat_number(topic_type, max_t, min_t):
     fn_fixture = FFlatNumber(topic_type, max_t, min_t)
-    Topic = fn_fixture.Event.Topic
+    Topic = fn_fixture.Topic
     fn_fixture.test()
     for tcontent in range(fn_fixture.min_t, fn_fixture.min_t + 10):
         # TODO expose Topic & Msg to matcher?
-        assert fn_fixture.Event.Topic(tcontent).content == tcontent
+        assert Topic(tcontent).content == tcontent
 
