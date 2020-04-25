@@ -22,8 +22,8 @@ from hmap.sim.communication.local_communicator import LocalCommunicator
 class RadioTransceiver(Communicator):
     def __init__(
             self, *, context,
-            send_duration=1, 
-            recv_duration=1,
+            send_duration=0.5, 
+            recv_duration=0.5,
             send_range=1,
             recv_range=1,
             max_buffer_size=2048):
@@ -31,28 +31,26 @@ class RadioTransceiver(Communicator):
             raise TypeError("context does not have correct traits")
         super().__init__()
         self.__ctx = context
-        self.__world = None
+        self.__world = []
         self.__closed = False
         self.__buffer_lock  = Lock()
         self.__buffer = []
         self.__mailbox = Queue()
-        self.__receiving= Thread(target=self.recv_loop, daemon=True)
         # public attributes
         self.send_duration = send_duration
         self.recv_duration = recv_duration
         self.send_range = send_range
         self.recv_range = recv_range
         self.max_buffer_size=max_buffer_size
-        # start receive loop
-        self.__receiving.start()
-    @property
-    def world(self):
-        return [t() for t in self.__world if t() is not None]
-    @world.setter
-    def world(self, world):
-        self.__world = [weakref.ref(t) for t in world if t is not self]
+        # stuff to log
+        self.interference_log = []
+        self.send_log = []
+        self.recv_log = []
+
+
+    # receive until unable to ""
     def send(self, data, timeout=None):
-        if self.__closed or self.__world is None:
+        if self.__closed:
             raise EOFError
         # check if in the process of receiving something (if so delay the send)
         while (timeout is None or timeout >= 0) and not self.__closed:
@@ -78,9 +76,6 @@ class RadioTransceiver(Communicator):
                 # need to loop back and verify window is still open
                 # there is a chance for interference and could get bigger
 
-                
-            
-
         data = pickle.dumps((self.send_duration, data))
         # get neighbors that are close
         for n in self.__world:
@@ -91,14 +86,17 @@ class RadioTransceiver(Communicator):
                 n.__mailbox.put(data)
         # pause for duration (can't send anything else 
         self.__ctx.sleep(self.send_duration)
+        return True
     def in_range(self, t):
         max_distance = self.recv_range + t.send_range
         dx = self.__ctx.x - t.__ctx.x
         dy = self.__ctx.y - t.__ctx.y
         return dx**2 +  dy**2 <= max_distance**2
-    def recv_loop(self):
+    def update_buffer(self):
         while True:
-            raw_data = self.__mailbox.get() # gets a message 
+            raw_data = self.__ipc_trx.recv(timeout=0) 
+            if raw_data == b"": # no more bytes to recv
+                return
             if raw_data is None or self.__closed: # poison pill, end loop
                 self.__mailbox.task_done()
                 return 
@@ -163,8 +161,9 @@ class RadioTransceiver(Communicator):
                     if time >= e: # message completely sent
                         self.__buffer.pop() # remove message
                         if data == "INTERFERENCE": # interference
-                             # TODO log interference
-                             continue
+                            print("FOUND INTERFERENCE")
+                            self.interference_log.append((s, e))
+                            continue
                         elif data == "BUFFER OVERFLOW": # buffer overflow
                             # TODO log buffer overflow
                             continue
@@ -180,6 +179,9 @@ class RadioTransceiver(Communicator):
             raise EOFError
         return b"" # no dice after timeout
     def close(self):
-        self.__mailbox.put(None)
-        self.__closed = True
+        try:
+            self.__mailbox.put(None)
+            self.__closed = True
+        except AttributeError: # closed before started
+            return
 

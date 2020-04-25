@@ -23,7 +23,6 @@ class Router(ABC):
         self.__Interest = matcher.Interest
         self.__Event = matcher.Event
         self.__Sub = matcher.Subscription
-        self.__matcher = matcher
         # private helpers 
         self.__matcher = matcher
         self.__local_subs = self.__Interest.Map()
@@ -34,19 +33,24 @@ class Router(ABC):
         """List of interests of local subscriptions"""
         return self.__local_subs.interests
     @property
+    def Event(self):
+        return self.__matcher.Event
+    @property
+    def Subscription(self):
+        return self.__matcher.Subscription
+    @property
+    def Interest(self):
+        return self.__matcher.Interest
+    @property
     def matcher(self):
         """Algorithm used for event, subscription and interest creation"""
         return self.__matcher
-    def publish(self, *args, **kwargs):
-        """Creates an event from the arguments specified, notifies all local
-        subscriptions and the routing algorithm
-        """
-        e = self.__Event(*args, **kwargs)
+    def notify(self, e):
         # notify subscriptions
         self.notify_subscriptions(e)
         # notify router
         self.notify_router(e)
-    def subscribe(self, *args, **kwargs):
+    def subscribe(self, s):
         """Creates a new subscription from arguments specified: the subscription
         created is notified when an event matches their criteria.
 
@@ -56,9 +60,8 @@ class Router(ABC):
         Raises:
             (TypeError): invocation when inactive
         """
-        s = self.__Sub(*args, **kwargs)
         self.__local_subs.add(s.interest, s)
-    def unsubscribe(self, token):
+    def unsubscribe(self, s):
         """Removes the subscription corresponding to the token from the list of
         local subscriptions
 
@@ -69,7 +72,7 @@ class Router(ABC):
             (KeyError): subscription was not removed successfully
         """
         # token is a subscription instance
-        self.__local_subs.remove(token.interest, token)
+        self.__local_subs.remove(s.interest, s)
     def notify_subscriptions(self, event):
         """Notifies all local subscriptions of an event"""
         # TODO executor

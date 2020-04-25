@@ -106,7 +106,7 @@ class IPCTransceiver(Communicator):
     def send(self, data, timeout=None):
         try:
             self.__server.send_bytes(data)
-        except(OSError, AttributeError, BrokenPipeError): # file is closed
+        except(OSError, AttributeError, BrokenPipeError, EOFError): # file is closed
             raise EOFError
     def recv(self, timeout=None):
         if self.__close_flag.poll():

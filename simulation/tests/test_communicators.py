@@ -88,53 +88,18 @@ def test_radio_transceiver(caplog):
     comm_fixture.test()
 
 
-"""
-class ______ManualClock(FRadioTransceiver.Context):
-    def __init__(self):
-        self.__time = 0
-        self.__pending = {}
-        self.__pending_lock = Lock()
+class Ctx(FRadioTransceiver.Context):
+    def __init__(self, x, y, clock): 
+        super().__init__(x, y)
+        self.__clk = clock
     @property
-    def time(self):
-        return self.__time
-    @time.setter
-    def time(self, t):
-        assert t > self.__time # not time travelling
-        self.__time = t
-        # go through and notify pending times 
-        with self.__pending_lock:
-            while self.__pending != []
-                pending_time, pending_condition = self.__pending[0]
-                if t >= pending_time: # past pending, notify pending condition
-                    pending_condition.notify_all()
-                    self.__pending.pop(0)
-                else: # t not yet at pending time
-                    break
-    def tick(duration):
-        cv = None
-        with self.__pending_lock:
-            t = self.__time + duration
-            for i in range(len(self.__pending)):
-                pending_time, pending_condition = self.__pending[i]
-                #       t
-                #  p0
-                if t > pending_time:
-                    continue
-                #        t
-                #  p0    p1     p2
-                elif t == pending_time:
-                    cv = pending_condition.wait()
-                #            t
-                #   p0   p1     p2
-                else: # t is before the next pending time
-                    cv = Condition()
-                    self.__pending.insert(i, (t, cv))
-            if cv is None: # could not find a place to insert it
-                cv = Condition()
-                self.__pending.append((t, cv))
-        cv.wait() # wait for condition to be met
-"""
-class ManualClock(FRadioTransceiver.Context):
+    def time(self): 
+        return self.__clk.time
+    def sleep(self, duration):
+        self.__clk.sleep(duration)
+
+
+class ManualClock():
     def __init__(self):
         self.__env = simpy.Environment()
     @property
@@ -155,33 +120,59 @@ class ManualClock(FRadioTransceiver.Context):
         now = env.now
         while now == self.__env.peek():
             self.__env.step()
-        
 
-def test_radio_transceiver_properties(caplog):
+def test_radio_interference(caplog):
     caplog.set_level(logging.INFO)
-    def print_time(clock, delay):
-        print(f"{delay}: {clock.time}")
-        clock.sleep(delay)
-        print(f"{delay}: {clock.time}")
+    clock = ManualClock()
+    trx0 = RadioTransceiver(
+            context = Ctx(0, 0, clock),
+            send_duration=1,
+            recv_duration=1,
+            send_range=1.5,
+            recv_range=1.5,
+            max_buffer_size=math.inf)
+    trx2 = RadioTransceiver(
+            context = Ctx(2, 0, clock),
+            send_duration=1,
+            recv_duration=1,
+            send_range=1.5,
+            recv_range=1.5,
+            max_buffer_size=math.inf)
+    trx4 = RadioTransceiver(
+            context = Ctx(4, 0, clock),
+            send_duration=1,
+            recv_duration=1,
+            send_range=1.5,
+            recv_range=1.5,
+            max_buffer_size=math.inf)
+    world = [trx0, trx2, trx4]
+    trx0.world = world
+    trx2.world = world
+    trx4.world = world
 
-    c = ManualClock()
-    t1 = Thread(target=print_time, args=([c, 5]))
-    t1.start()
-    t2 = Thread(target=print_time, args=([c, 3]))
-    t2.start()
-    t3 = Thread(target=print_time, args=([c, 1]))
-    t3.start()
+    def send(trx, data):
+        Thread(target=trx.send, args=[data], daemon=True).start()
 
-    c.tick(delay=5)
-    t4 = Thread(target=print_time, args=([c, 2]))
-    t4.start()
+    def tick(clk):
+        Thread(target=clk.tick, daemon=True).start()
 
-    c.tick()
-    c.tick()
+    def recv(trx, expected, timeout=0):
+        def assert_recv():
+            assert trx.recv(timeout=timeout) == expected
+        Thread(target=assert_recv, daemon=True).start()
 
-
-
-
+    send(trx0, b"msg1")
+    send(trx4, b"msg2")
+    assert clock.time == 0
+    clock.tick()
+    assert clock.time == 1
+    recv(trx2, b"", timeout=0)
+    clock.tick()
+    send(trx0, b"msg3")
+    clock.tick()
+    recv(trx2, b"msg3")
+    clock.tick()
+    assert trx2.interference_log == [(0,1)]
 
 def test_local_communicator(caplog):
     caplog.set_level(logging.INFO)
