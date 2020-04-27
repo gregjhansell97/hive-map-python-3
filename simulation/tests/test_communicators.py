@@ -52,35 +52,35 @@ class FRadioTransceiver(FCommunicator):
         def sleep(self, duration):
             return time.sleep(duration)
     def connected(self):
-        world = []
+        world = str(uuid.uuid4())
+        trxs = []
         for _ in range(20):
             x, y = (random.uniform(-1, 1), random.uniform(-1, 1))
             t = RadioTransceiver(
                 context = self.Context(x, y),
+                world = world,
                 send_duration=0.1,
                 recv_duration=0.01,
                 send_range=5,
                 recv_range=5,
                 max_buffer_size=math.inf)
-            world.append(t)
-        # connect all transceivers to the world created
-        for t in world:
-            t.world = world
-        return world
+            trxs.append(t)
+        time.sleep(1)
+        return trxs
     def isolated(self, n):
-        world = []
+        trxs = []
         for x, y in zip(range(n), range(n)):
-            world.append(
+            trxs.append(
                 RadioTransceiver(
                     context = self.Context(x, y),
+                    world = str(uuid.uuid4()),
                     send_duration=0.1,
                     recv_duration=0.01,
                     send_range=0.25,
                     recv_range=0.25,
                     max_buffer_size=math.inf))
-        for t in world:
-            t.world = world
-        return world
+        time.sleep(1)
+        return trxs
 
 def test_radio_transceiver(caplog):
     caplog.set_level(logging.INFO)
@@ -121,7 +121,7 @@ class ManualClock():
         while now == self.__env.peek():
             self.__env.step()
 
-def test_radio_interference(caplog):
+def _test_radio_interference(caplog):
     caplog.set_level(logging.INFO)
     clock = ManualClock()
     trx0 = RadioTransceiver(
@@ -174,7 +174,7 @@ def test_radio_interference(caplog):
     clock.tick()
     assert trx2.interference_log == [(0,1)]
 
-def test_local_communicator(caplog):
+def _test_local_communicator(caplog):
     caplog.set_level(logging.INFO)
     comm_fixture = FLocalCommunicator()
     comm_fixture.test()

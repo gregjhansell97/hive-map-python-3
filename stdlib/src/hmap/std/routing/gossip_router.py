@@ -4,6 +4,7 @@
 import pickle
 from threading import Thread, Lock
 
+
 from hmap.interface.routing import Router
 from hmap.interface import has_traits
 from hmap.interface.context.traits import uid, random
@@ -60,7 +61,14 @@ class GossipRouter(Router):
                 # forward off the data to other neighbors if new
                 if self.__ctx.random_uniform(0, 1) <= self.__gossip_level:
                     with self.__trx_lock:
-                        self.__trx.send(raw_data)
+                        try:
+                            self.__trx.send(raw_data)
+                        except EOFError:
+                            return 
+            else:
+                pass
+                #print(mcount)
+                #print("SEEN IT BEFORE")
 
 
     def notify_router(self, event):
@@ -73,5 +81,8 @@ class GossipRouter(Router):
         # send message off! 
         self.__msg_count += 1
         with self.__trx_lock:
-            self.__trx.send(raw_msg)
+            try:
+                self.__trx.send(raw_msg)
+            except EOFError:
+                return 
 

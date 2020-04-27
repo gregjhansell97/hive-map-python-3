@@ -106,6 +106,7 @@ class IPCTransceiver(Communicator):
     def send(self, data, timeout=None):
         try:
             self.__server.send_bytes(data)
+            return True
         except(OSError, AttributeError, BrokenPipeError, EOFError): # file is closed
             raise EOFError
     def recv(self, timeout=None):
@@ -113,9 +114,12 @@ class IPCTransceiver(Communicator):
             raise EOFError
         while True:
             with self.__server_lock:
-                responses = wait(
-                        [self.__server, self.__close_flag],
-                        timeout=timeout)
+                try:
+                    responses = wait(
+                            [self.__server, self.__close_flag],
+                            timeout=timeout)
+                except OSError:
+                    raise EOFError
                 if self.__close_flag in responses:
                     raise EOFError # end of session, self.close invoked
                 if len(responses) == 0: 

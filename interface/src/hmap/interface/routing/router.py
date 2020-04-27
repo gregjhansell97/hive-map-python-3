@@ -76,8 +76,10 @@ class Router(ABC):
     def notify_subscriptions(self, event):
         """Notifies all local subscriptions of an event"""
         # TODO executor
-        for s in self.__local_subs.match(event):
+        matches = list(self.__local_subs.match(event))
+        for s in matches:
             s.notify(event)
+        return len(matches)
     @abstractmethod
     def notify_router(self, event):
         """Notifies implementation of router of a locally published event. Must

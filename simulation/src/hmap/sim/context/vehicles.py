@@ -13,9 +13,13 @@ class OmniDirectionalVehicle(X, Y, XVel, YVel):
     @property
     def x(self):
         return self.__x
+    def set_x(self, x):
+        self.__x = x
     @property
     def y(self):
         return self.__y
+    def set_y(self, y):
+        self.__y = y
     @property
     def x_vel(self):
         return self.__x_vel
@@ -26,6 +30,3 @@ class OmniDirectionalVehicle(X, Y, XVel, YVel):
         return self.__y_vel
     def set_y_vel(self, yv):
         self.__y_vel = yv
-    def step(self, dt):
-        self.__x += self.__x_vel*dt
-        self.__y += self.__y_vel*dt
