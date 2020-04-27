@@ -31,7 +31,7 @@ class RadioTransceiver(Communicator):
     def __init__(
             self, *, context, world,
             send_duration=0.5, 
-            recv_duration=0.5,
+            recv_duration=0.0,
             send_range=1,
             recv_range=1,
             max_buffer_size=math.inf):
@@ -44,6 +44,7 @@ class RadioTransceiver(Communicator):
         self.__buffer_lock  = Lock()
         self.__buffer = []
         # public attributes
+        self.data_rate = (2000*1000)/8 # 2000 kbps -> 
         self.send_duration = send_duration
         self.recv_duration = recv_duration
         self.send_range = send_range
@@ -53,8 +54,9 @@ class RadioTransceiver(Communicator):
         self.interference_log = []
         self.send_log = []
         self.recv_log = []
+        
 
-        self.__last_sent = -math.inf
+        self.__next_possible_send = -math.inf
 
     @property
     def loc(self):
@@ -96,14 +98,17 @@ class RadioTransceiver(Communicator):
                 # there is a chance for interference and could get bigger
         """
         # keeps from sending before ready
-        while self.__ctx.time - self.__last_sent < self.send_duration:
-            pass
-        self.__last_sent = self.__ctx.time
+        while self.__ctx.time < self.__next_possible_send:
+            self.__ctx.sleep(0.0001)
+
+
+        duration = len(data)/self.data_rate
+        self.__next_possible_send = self.__ctx.time + duration
 
         data = pickle.dumps(
                 ((self.loc, 
                  (self.send_range, self.recv_range), 
-                 self.send_duration, 
+                 duration, 
                  data)))
         assert(self.__ipc_trx.send(data))
         # get neighbors that are close
@@ -179,7 +184,7 @@ class RadioTransceiver(Communicator):
             # FORMERLY LOCKED^^^^
     def recv(self, timeout=None):
         # iterate through until timeout or message received
-        self.__ctx.sleep(self.recv_duration)
+        #self.__ctx.sleep(self.recv_duration)
         while timeout is None or timeout >= 0:
             start_time = self.time
             self.update_buffer()
@@ -215,7 +220,6 @@ class RadioTransceiver(Communicator):
                         #print("INTERFERENCE :(")
                         continue
                     elif data == "BUFFER OVERFLOW": # buffer overflow
-                        print("really shouldnt be here")
                         # TODO log buffer overflow
                         continue
                     else: # data received!
