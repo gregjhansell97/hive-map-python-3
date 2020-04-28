@@ -30,8 +30,7 @@ def in_range(recv_loc, recv_range, send_loc, send_range):
 class RadioTransceiver(Communicator):
     def __init__(
             self, *, context, world,
-            send_duration=0.5, 
-            recv_duration=0.0,
+            data_rate=math.inf,
             send_range=1,
             recv_range=1,
             max_buffer_size=math.inf):
@@ -44,9 +43,7 @@ class RadioTransceiver(Communicator):
         self.__buffer_lock  = Lock()
         self.__buffer = []
         # public attributes
-        self.data_rate = (2000*1000)/8 # 2000 kbps -> 
-        self.send_duration = send_duration
-        self.recv_duration = recv_duration
+        self.data_rate = data_rate
         self.send_range = send_range
         self.recv_range = recv_range
         self.max_buffer_size=max_buffer_size
@@ -101,7 +98,7 @@ class RadioTransceiver(Communicator):
         while self.__ctx.time < self.__next_possible_send:
             self.__ctx.sleep(0.0001)
 
-
+        data_rate_bytes_per_second = (self.data_rate*1000)/8
         duration = len(data)/self.data_rate
         self.__next_possible_send = self.__ctx.time + duration
 
@@ -112,7 +109,6 @@ class RadioTransceiver(Communicator):
                  data)))
         assert(self.__ipc_trx.send(data))
         # get neighbors that are close
-        #self.__ctx.sleep(self.send_duration)
         return True
 
 
@@ -184,7 +180,6 @@ class RadioTransceiver(Communicator):
             # FORMERLY LOCKED^^^^
     def recv(self, timeout=None):
         # iterate through until timeout or message received
-        #self.__ctx.sleep(self.recv_duration)
         while timeout is None or timeout >= 0:
             start_time = self.time
             self.update_buffer()
